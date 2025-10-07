@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { auth0 } from "@/lib/auth";
 import { Bell } from "lucide-react";
 import { Button } from "./ui/button";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { ScrollArea } from "./ui/scroll-area";
 import PageTitle from "./page-title";
 
 interface MainProps {

@@ -1,4 +1,4 @@
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import {  Menu, Sunset, Zap } from "lucide-react";
 
 import {
   Accordion,
@@ -25,6 +25,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import Image from "next/image";
 
 interface MenuItem {
   title: string;
@@ -106,7 +107,9 @@ const Navbar = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img
+              <Image
+                width={40}
+                height={40}
                 src={logo.src}
                 className="max-h-8 dark:invert"
                 alt={logo.alt}
@@ -135,7 +138,9 @@ const Navbar = ({
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img
+              <Image
+                width={40}
+                height={40}
                 src={logo.src}
                 className="max-h-8 dark:invert"
                 alt={logo.alt}
@@ -151,7 +156,9 @@ const Navbar = ({
                 <SheetHeader>
                   <SheetTitle>
                     <a href={logo.url} className="flex items-center gap-2">
-                      <img
+                      <Image
+                        width={40}
+                        height={40}
                         src={logo.src}
                         className="max-h-8 dark:invert"
                         alt={logo.alt}

@@ -1,4 +1,4 @@
-import { CircleDollarSign, CreditCard, LayoutDashboard, LogOut, PiggyBank, Settings } from "lucide-react";
+import { CircleDollarSign, CreditCard, LayoutDashboard, PiggyBank, Settings } from "lucide-react";
 
 export const menuItems = [
   { name: "Home", href: "/dashboard", Icon: LayoutDashboard },

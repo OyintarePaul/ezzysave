@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import {
   Table,
   TableBody,

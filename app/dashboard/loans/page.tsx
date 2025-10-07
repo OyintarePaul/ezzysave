@@ -51,7 +51,7 @@ async function LoansPage() {
         </EmptyHeader>
         <EmptyTitle>No Loans</EmptyTitle>
         <EmptyDescription>
-          Looks like you don't have any pending or active loans
+          Looks like you don&apos;t have any pending or active loans
         </EmptyDescription>
         <EmptyContent>
           <Link href="/dashboard/loans/new" className={buttonVariants()}>

@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { auth0 } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { HandCoins } from "lucide-react";
 
 async function TransactionsPage() {
   const session = await auth0.getSession();
