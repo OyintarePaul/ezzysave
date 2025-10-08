@@ -1,11 +1,11 @@
 import SavingsList from "@/components/savings";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth0, pageAuthGuard } from "@/lib/auth";
+import { pageAuthGuard } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-async function SavingsPage() {
+export default async function SavingsPage() {
   await pageAuthGuard("/dashboard/savings");
 
   return (
@@ -32,7 +32,3 @@ async function SavingsPage() {
     </div>
   );
 }
-
-export default auth0.withPageAuthRequired(SavingsPage, {
-  returnTo: "/dashboard/savings",
-});

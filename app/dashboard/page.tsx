@@ -1,7 +1,7 @@
 import Transactions from "@/components/transactions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { auth0, pageAuthGuard } from "@/lib/auth";
+import { pageAuthGuard } from "@/lib/auth";
 import { Plus } from "lucide-react";
 
 const balances = [
