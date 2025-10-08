@@ -8,18 +8,13 @@ import {
 } from "@/components/ui/empty";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth0 } from "@/lib/auth";
+import { auth0, pageAuthGuard } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { HandCoins } from "lucide-react";
 
-async function LoansPage() {
-  const session = await auth0.getSession();
-
-  if (!session) {
-    return <div>Not authenticated</div>;
-  }
-
+export default async function LoansPage() {
+  pageAuthGuard("/dashboard/loans");
   return (
     <div className="flex flex-col gap-2">
       <Card className="bg-green-500 text-white bg-[url('/money-bag.png')] bg-no-repeat bg-[length:200px] bg-[position:right_2rem_bottom_1rem]">
@@ -62,7 +57,3 @@ async function LoansPage() {
     </div>
   );
 }
-
-export default auth0.withPageAuthRequired(LoansPage, {
-  returnTo: "/dashboard/loans",
-});

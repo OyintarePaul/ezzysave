@@ -1,16 +1,12 @@
 import SavingsList from "@/components/savings";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth0 } from "@/lib/auth";
+import { auth0, pageAuthGuard } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 async function SavingsPage() {
-  const session = await auth0.getSession();
-
-  if (!session) {
-    return <div>Not authenticated</div>;
-  }
+  await pageAuthGuard("/dashboard/savings");
 
   return (
     <div className="flex flex-col gap-2">

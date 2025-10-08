@@ -1,7 +1,7 @@
 import Transactions from "@/components/transactions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { auth0 } from "@/lib/auth";
+import { auth0, pageAuthGuard } from "@/lib/auth";
 import { Plus } from "lucide-react";
 
 const balances = [
@@ -11,14 +11,8 @@ const balances = [
   { label: "Unallocated balance", amount: "$5,000" },
 ];
 
-
-async function DashboardHome() {
-  const session = await auth0.getSession();
-
-  if (!session) {
-    return <div>Not authenticated</div>;
-  }
-
+export default async function DashboardHome() {
+  pageAuthGuard("/dashboard");
   return (
     <div className="flex flex-col gap-2">
       <div className="grid gap-4 rounded-lg grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
@@ -44,7 +38,3 @@ async function DashboardHome() {
     </div>
   );
 }
-
-export default auth0.withPageAuthRequired(DashboardHome, {
-  returnTo: "/dashboard",
-});

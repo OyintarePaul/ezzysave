@@ -1,16 +1,12 @@
 import TransactionsTable from "@/components/transactions";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { auth0 } from "@/lib/auth";
+import { auth0, pageAuthGuard } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-async function TransactionsPage() {
-  const session = await auth0.getSession();
-
-  if (!session) {
-    return <div>Not authenticated</div>;
-  }
+export default async function TransactionsPage() {
+  await pageAuthGuard("/dashboard/transactions");
 
   return (
     <div className="flex flex-col gap-2">
@@ -40,7 +36,3 @@ async function TransactionsPage() {
     </div>
   );
 }
-
-export default auth0.withPageAuthRequired(TransactionsPage, {
-  returnTo: "/dashboard/transactions",
-});
