@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zee-Exclusive",
-  description: "A reliable and trustworthy saving platform",
+  title: "EzzySave - Simplified Saving and Loans",
+  description: "EzzySave is a user-friendly platform designed to simplify saving and loan management for individuals and businesses alike.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.className} antialiased`}
       >
         {children}
       </body>

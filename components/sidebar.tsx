@@ -19,11 +19,11 @@ const Sidebar = () => {
         {menuItems.map(({ name, href, Icon }) => (
           <li key={name}>
             <Link
-              href={href}
+              href={`/dashboard/${href}`}
               className={cn(
                 "flex items-center gap-2 py-3 px-2 hover:bg-gray-100 rounded-md",
                 {
-                  "bg-gray-200": pathname === href,
+                  "bg-gray-200": pathname.includes(href),
                 }
               )}
             >
