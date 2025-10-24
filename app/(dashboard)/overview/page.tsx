@@ -14,13 +14,13 @@ const Overview: React.FC = () => {
                     title="Total Funds Saved"
                     value="$12,450.00"
                     description="+5.2% from last month"
-                    bgColor="bg-blue-500"
+                    bgColor="bg-green-500"
                 />
                 <OverviewCard
                     title="Target Savings Goal"
                     value="$5,000.00"
                     description="2 active goals, 65% complete"
-                    bgColor="bg-green-500"
+                    bgColor="bg-blue-500"
                 />
                 <OverviewCard
                     title="Accrued Interest"

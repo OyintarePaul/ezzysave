@@ -107,10 +107,7 @@ const LoanApplicationSection = () => (
     </div>
 
     {/* Apply Button */}
-    <Button
-    size="lg"
-      className="w-full p-6 text-xl font-semibold rounded-xl"
-    >
+    <Button size="lg" className="w-full p-6 text-xl font-semibold rounded-xl">
       Apply for a Loan
     </Button>
   </section>

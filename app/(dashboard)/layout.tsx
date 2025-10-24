@@ -25,12 +25,7 @@ export default async function DashboardLayout({
           <Header />
 
           <main className="min-h-full">
-            <div>
-              {/* <h1 className="text-3xl font-bold text-gray-900 dark:text-white p-8">
-                  {navItems.find((item) => item.path === pathname)?.name} Page
-                </h1> */}
-              {children}
-            </div>
+            <div>{children}</div>
           </main>
         </div>
 

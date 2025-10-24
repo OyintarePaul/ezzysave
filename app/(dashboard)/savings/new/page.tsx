@@ -27,7 +27,7 @@ interface SavingsFormData {
   dailyDays?: number;
 }
 
-const CreateSavingsPlanPage: React.FC<{ userId: string; db: any }> = ({}) => {
+const CreateSavingsPlanPage: React.FC = () => {
   const [formData, setFormData] = useState<SavingsFormData>({
     planType: "Target",
     planName: "",
@@ -40,7 +40,7 @@ const CreateSavingsPlanPage: React.FC<{ userId: string; db: any }> = ({}) => {
     dailyDays: 365,
     termMonths: 12,
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error" | "info";
     text: string;
@@ -72,7 +72,7 @@ const CreateSavingsPlanPage: React.FC<{ userId: string; db: any }> = ({}) => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: val as any,
+      [name]: val as SavingsFormData["planType"] | string | number,
     }));
   };
 

@@ -92,9 +92,7 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
 
       <div className="mt-6 flex justify-end">
         <Button size="sm" variant="link" asChild>
-          <Link href="/savings/1">
-          View Details →
-          </Link>
+          <Link href="/savings/1">View Details →</Link>
         </Button>
       </div>
     </div>
@@ -130,15 +128,6 @@ const SavingsPlansPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           My Savings Plans
         </h1>
-        <Button asChild>
-          <Link
-            href="/savings/new"
-            className="mt-4 sm:mt-0"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Plan</span>
-          </Link>
-        </Button>
       </header>
       <p className="text-gray-600 dark:text-gray-400">
         View and manage all your savings goals, both active and completed.
@@ -153,11 +142,9 @@ const SavingsPlansPage: React.FC = () => {
           </p>
         </div>
         <Button asChild>
-          <Link
-            href="/savings/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg"
-          >
-            Start Saving Today
+          <Link href="/savings/new" className="mt-4 sm:mt-0">
+            <Plus className="h-5 w-5" />
+            <span>New Plan</span>
           </Link>
         </Button>
       </div>

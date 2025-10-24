@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   // Redirect logged-in users accessing the root path to the dashboard if there is a session
   if (request.nextUrl.pathname === "/" && session) {
     return NextResponse.redirect(
-      new URL("/auth/login?returnTo=/dashboard", request.nextUrl.origin)
+      new URL("/auth/login?returnTo=/overview", request.nextUrl.origin)
     );
   }
 
@@ -19,9 +19,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect unauthenticated users trying to access the dashboard to the login page
-  if (!session && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!session && request.nextUrl.pathname.startsWith("/overview")) {
     return NextResponse.redirect(
-      new URL("/auth/login", request.nextUrl.origin)
+      new URL("/auth/login?returnTo=/overview", request.nextUrl.origin)
     );
   }
 
