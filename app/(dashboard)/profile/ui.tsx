@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { FormCheckbox, FormInput } from "../components/form-input";
-import { Mail, Phone, User } from "lucide-react";
+import { FormInput } from "../components/form-input";
+import { Lock, Mail, Phone, User } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,9 @@ function ProfilePageUI() {
       email: true,
       sms: false,
     },
+    currentPin: "",
+    newPin: "",
+    confirmPin: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -28,16 +31,16 @@ function ProfilePageUI() {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (name: string, checked: boolean) => {
-    // The 'id' from the checkbox is used as the key name (e.g., 'email', 'sms')
-    setProfile((prev) => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [name]: checked,
-      },
-    }));
-  };
+  // const handleCheckboxChange = (name: string, checked: boolean) => {
+  //   // The 'id' from the checkbox is used as the key name (e.g., 'email', 'sms')
+  //   setProfile((prev) => ({
+  //     ...prev,
+  //     notifications: {
+  //       ...prev.notifications,
+  //       [name]: checked,
+  //     },
+  //   }));
+  // };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,8 +150,45 @@ function ProfilePageUI() {
           />
         </div>
 
-        {/* Notification Settings Card */}
         <div className="bg-white p-6 rounded-xl shadow-lg border dark:bg-gray-800 dark:border-gray-700 space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-3 dark:border-gray-700">
+            Withdrawal Pin Settings
+          </h3>
+          <div className="space-y-4">
+            <FormInput
+              id="currentPin"
+              label="Current Password"
+              type="password"
+              onChange={handleChange}
+              // Name attribute matches state key
+              value={profile.currentPin}
+              icon={<Lock className="h-5 w-5" />}
+              placeholder="Enter your account password"
+            />
+            <FormInput
+              id="newPin"
+              label="New 4-Digit Pin"
+              type="password" // Use "password" to hide PIN
+              // Name attribute matches state key
+              value={profile.newPin}
+              onChange={handleChange}
+              icon={<Lock className="h-5 w-5" />}
+              placeholder="****"
+            />
+            <FormInput
+              id="confirmPin"
+              label="Confirm New Pin"
+              type="password"
+              value={profile.confirmPin}
+              onChange={handleChange}
+              icon={<Lock className="h-5 w-5" />}
+              placeholder="****"
+            />
+          </div>
+        </div>
+
+        {/* Notification Settings Card */}
+        {/* <div className="bg-white p-6 rounded-xl shadow-lg border dark:bg-gray-800 dark:border-gray-700 space-y-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b pb-3 dark:border-gray-700">
             Notification Preferences
           </h3>
@@ -161,16 +201,16 @@ function ProfilePageUI() {
               checked={profile.notifications.email}
               onChange={handleCheckboxChange}
             />
-            {/* <FormCheckbox
+            <FormCheckbox
               id="sms-notifications" // Using a more specific ID
               name="sms" // This name maps to the state key
               label="SMS Notifications"
               description="Get important alerts and reminders sent to your mobile phone."
               checked={profile.notifications.sms}
               onChange={handleCheckboxChange}
-            /> */}
+            />
           </div>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">

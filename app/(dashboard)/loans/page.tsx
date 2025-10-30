@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loan, mockLoans } from "@/constants/mock";
 import { pageAuthGuard } from "@/lib/auth";
@@ -12,6 +11,8 @@ import {
   HandCoins,
   Percent,
 } from "lucide-react";
+import LoanApplicationModal from "./loan-application-modal";
+import { Button } from "@/components/ui/button";
 
 // Loan History Item Component
 const LoanHistoryItem: React.FC<{ loan: Loan }> = ({ loan }) => {
@@ -76,6 +77,14 @@ const LoanHistoryItem: React.FC<{ loan: Loan }> = ({ loan }) => {
           <span>{progress.toFixed(0)}% Complete</span>
         </div>
       </div>
+
+      {(loan.status === "Active" || loan.status === "Deferred") && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <Button className="w-full sm:w-auto px-5 py-2 font-semibold h-auto">
+            Make Payment
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
@@ -107,9 +116,7 @@ const LoanApplicationSection = () => (
     </div>
 
     {/* Apply Button */}
-    <Button size="lg" className="w-full p-6 text-xl font-semibold rounded-xl">
-      Apply for a Loan
-    </Button>
+    <LoanApplicationModal />
   </section>
 );
 
@@ -126,11 +133,11 @@ const Loans: React.FC = () => {
           EzzySave Loan Center
         </h1>
         <p className="mt-1 text-gray-500 dark:text-gray-400">
-          Manage your outstanding credit and estimate new payments.
+          Manage your outstanding credit and apply for new loans.
         </p>
       </header>
 
-      <main className="">
+      <main className="space-y-8">
         <LoanApplicationSection />
 
         {/* Current Loans Status (1/3 width on desktop) */}

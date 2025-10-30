@@ -104,20 +104,43 @@ export const mockSavingsPlans: SavingsPlan[] = [
   },
 ];
 
-
 // Mock Loan Data
 export interface Loan {
-    id: string;
-    name: string;
-    originalAmount: number;
-    balance: number;
-    status: 'Active' | 'Paid Off' | 'Deferred';
-    rate: number;
-    type: 'Auto' | 'Personal' | 'Student';
+  id: string;
+  name: string;
+  originalAmount: number;
+  balance: number;
+  status: "Active" | "Paid Off" | "Deferred";
+  rate: number;
+  type: "Auto" | "Personal" | "Student";
 }
 
 export const mockLoans: Loan[] = [
-    { id: 'L1', name: 'Auto Loan', originalAmount: 35000, balance: 12450, status: 'Active', rate: 4.5, type: 'Auto' },
-    { id: 'L2', name: 'Personal Loan', originalAmount: 5000, balance: 1120, status: 'Active', rate: 7.0, type: 'Personal' },
-    { id: 'L3', name: 'Student Loan', originalAmount: 55000, balance: 48900, status: 'Deferred', rate: 6.2, type: 'Student' },
+  {
+    id: "L1",
+    name: "Auto Loan",
+    originalAmount: 35000,
+    balance: 12450,
+    status: "Active",
+    rate: 4.5,
+    type: "Auto",
+  },
+  {
+    id: "L2",
+    name: "Personal Loan",
+    originalAmount: 5000,
+    balance: 1120,
+    status: "Paid Off",
+    rate: 7.0,
+    type: "Personal",
+  },
+  {
+    id: "L3",
+    name: "Student Loan",
+    originalAmount: 55000,
+    balance: 48900,
+    status: "Deferred",
+    rate: 6.2,
+    type: "Student",
+  },
 ];
