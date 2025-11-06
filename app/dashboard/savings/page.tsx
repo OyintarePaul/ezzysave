@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { mockSavingsPlans, SavingsPlan } from "@/constants/mock";
 import { pageAuthGuard } from "@/lib/auth";
+import { formatCurrency } from "@/lib/utils";
 import { CheckCircle, Info, Lock, Plus, Target, Zap } from "lucide-react";
 import Link from "next/link";
 
@@ -61,7 +62,7 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
         {isFixed ? (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              ${plan.currentAmount.toLocaleString()}
+              {formatCurrency(plan.currentAmount)}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Locked for 6 months @ {plan.interestRate}% APY
@@ -71,10 +72,10 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
           <>
             <div className="flex justify-between text-sm mb-1">
               <span className="font-medium text-gray-900 dark:text-white">
-                ${plan.currentAmount.toLocaleString()} Saved
+                {formatCurrency(plan.currentAmount)} Saved
               </span>
               <span className="text-gray-500 dark:text-gray-400">
-                Goal: ${plan.targetAmount.toLocaleString()}
+                Goal: {formatCurrency(plan.targetAmount)}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
@@ -111,7 +112,7 @@ const MaturedPlanListItem: React.FC<{ plan: SavingsPlan }> = ({ plan }) => (
     </div>
     <div className="text-right">
       <p className="font-semibold text-lg text-gray-700 dark:text-gray-300">
-        ${plan.targetAmount.toLocaleString()}
+        {formatCurrency(plan.targetAmount + (plan.targetAmount * plan.interestRate) / 100)}
       </p>
       <p className="text-xs text-gray-500">Final Payout</p>
     </div>
@@ -124,14 +125,14 @@ const SavingsPlansPage: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
-      <header className="flex flex-col sm:flex-row justify-between sm:items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <header className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
           My Savings Plans
         </h1>
+        <p className="mt-1 text-gray-500 dark:text-gray-400">
+          View and manage all your savings goals, both active and completed.
+        </p>
       </header>
-      <p className="text-gray-600 dark:text-gray-400">
-        View and manage all your savings goals, both active and completed.
-      </p>
 
       {/* CTA Card for New Plan */}
       <div className="bg-primary/10 p-6 rounded-xl border-2 border-primary/20 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
@@ -142,7 +143,7 @@ const SavingsPlansPage: React.FC = () => {
           </p>
         </div>
         <Button asChild>
-          <Link href="/savings/new" className="mt-4 sm:mt-0">
+          <Link href="dashboard/savings/new" className="mt-4 sm:mt-0">
             <Plus className="h-5 w-5" />
             <span>New Plan</span>
           </Link>

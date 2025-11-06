@@ -1,7 +1,9 @@
-import { pageAuthGuard } from "@/lib/auth";
+import CustomButton from "@/components/custom-button";
+import { formatCurrency } from "@/lib/utils";
 import { DollarSign } from "lucide-react";
+import Link from "next/link";
 
-const Overview: React.FC = () => {
+const OverviewUI: React.FC = () => {
   return (
     // Added pb-20 padding to push content up above the fixed bottom navigation on mobile
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
@@ -16,25 +18,25 @@ const Overview: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <OverviewCard
           title="Total Funds Saved"
-          value="$12,450.00"
+          value={0}
           description="+5.2% from last month"
           bgColor="bg-green-500"
         />
         <OverviewCard
           title="Target Savings Goal"
-          value="$5,000.00"
+          value={0}
           description="2 active goals, 65% complete"
           bgColor="bg-blue-500"
         />
         <OverviewCard
           title="Accrued Interest"
-          value="$156.75"
+          value={0}
           description="Interest earned this quarter"
           bgColor="bg-yellow-500"
         />
         <OverviewCard
           title="Available for Loan"
-          value="$8,000.00"
+          value={0}
           description="Pre-approved loan limit"
           bgColor="bg-red-500"
         />
@@ -93,15 +95,24 @@ const Overview: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Quick Actions
           </h2>
-          <button className="w-full text-left p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition">
-            + Create New Savings Plan
-          </button>
-          <button className="w-full text-left p-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-medium transition dark:bg-red-900/30 dark:hover:bg-red-900/50">
-            Request a Quick Loan
-          </button>
-          <button className="w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium transition dark:bg-gray-700/30 dark:hover:bg-gray-700/50">
-            View Transaction History
-          </button>
+          <CustomButton
+            className="w-full text-left p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition"
+            asChild
+          >
+            <Link href="/dashboard/savings/new">+ Create New Savings Plan</Link>
+          </CustomButton>
+          <CustomButton
+            className="w-full text-left p-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-medium transition dark:bg-red-900/30 dark:hover:bg-red-900/50"
+            asChild
+          >
+            <Link href="/dashboard/loans">Request a Quick Loan</Link>
+          </CustomButton>
+          <CustomButton
+            className="w-full text-left py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium transition dark:bg-gray-700/30 dark:hover:bg-gray-700/50"
+            asChild
+          >
+            <Link href="/dashboard/transactions">View Transaction History</Link>
+          </CustomButton>
         </div>
       </div>
     </div>
@@ -110,7 +121,7 @@ const Overview: React.FC = () => {
 
 interface OverviewCardProps {
   title: string;
-  value: string;
+  value: number;
   description: string;
   bgColor: string;
 }
@@ -129,7 +140,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
       {title}
     </p>
     <h3 className="text-lg md:text-3xl font-extrabold text-gray-900 mt-1 dark:text-white">
-      {value}
+      {formatCurrency(value)}
     </h3>
     <p className="text-xs text-gray-600 mt-2 dark:text-gray-400">
       {description}
@@ -137,7 +148,4 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
   </div>
 );
 
-export default async function OverviewPage() {
-  pageAuthGuard("/overview");
-  return <Overview />;
-}
+export default OverviewUI;

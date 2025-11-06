@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Header: React.FC = () => (
   <header className="bg-white shadow-md p-4 sticky top-0 z-10">
@@ -8,10 +9,10 @@ const Header: React.FC = () => (
         {/* <Button variant="ghost">Features</Button>
         <Button variant="ghost">Loans</Button> */}
         <Button variant="secondary" asChild>
-          <a href="/auth/login?returnTo=/overview">Sign In</a>
+          <Link href="/auth/login">Sign In</Link>
         </Button>
         <Button className="hidden sm:inline-block" asChild>
-          <a href="/auth/login?returnTo=/overview">Get Started</a>
+          <Link href="/auth/register">Get Started</Link>
         </Button>
       </nav>
     </div>

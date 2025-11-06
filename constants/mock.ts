@@ -15,7 +15,84 @@ export interface Transaction {
   description: string;
   amount: number;
   type: "Deposit" | "Withdrawal" | "Interest";
+  category?: "Savings" | "Loans" | "General";
+  status?: "Completed" | "Pending" | "Failed";
 }
+
+export const mockTransactions: Transaction[] = [
+  {
+    id: 1,
+    date: "2024-10-25",
+    description: "Monthly Salary Deposit",
+    type: "Deposit",
+    category: "Savings",
+    amount: 5000.0,
+    status: "Completed",
+  },
+  {
+    id: 2,
+    date: "2024-10-24",
+    description: "Withdrawal for Rent",
+    type: "Withdrawal",
+    category: "General",
+    amount: -1200.0,
+    status: "Completed",
+  },
+  {
+    id: 3,
+    date: "2024-10-23",
+    description: "Daily Savings Contribution",
+    type: "Deposit",
+    category: "Savings",
+    amount: 50.0,
+    status: "Completed",
+  },
+  {
+    id: 4,
+    date: "2024-10-22",
+    description: "Loan Repayment - October",
+    type: "Deposit",
+    category: "Loans",
+    amount: -350.0,
+    status: "Pending",
+  },
+  {
+    id: 5,
+    date: "2024-10-21",
+    description: "Target Savings Goal: Vacation",
+    type: "Deposit",
+    category: "Savings",
+    amount: 300.0,
+    status: "Completed",
+  },
+  {
+    id: 6,
+    date: "2024-10-20",
+    description: "ATM Withdrawal",
+    type: "Withdrawal",
+    category: "General",
+    amount: -200.0,
+    status: "Completed",
+  },
+  {
+    id: 7,
+    date: "2024-10-19",
+    description: "Interest Earned",
+    type: "Deposit",
+    category: "Savings",
+    amount: 15.5,
+    status: "Completed",
+  },
+  {
+    id: 8,
+    date: "2024-10-18",
+    description: "Emergency Loan Disbursement",
+    type: "Deposit",
+    category: "Loans",
+    amount: 1000.0,
+    status: "Completed",
+  },
+];
 
 export const mockSavingsPlans: SavingsPlan[] = [
   {

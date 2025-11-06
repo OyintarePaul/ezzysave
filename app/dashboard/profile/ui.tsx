@@ -1,17 +1,33 @@
 "use client";
 import React, { useState } from "react";
-import { FormInput } from "../components/form-input";
-import { Lock, Mail, Phone, User } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FormInput } from "../../../components/form-input";
+import { Lock, LogOut, Mail, Phone, User } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import CustomButton from "@/components/custom-button";
+import { useClerk } from "@clerk/nextjs";
 
-function ProfilePageUI() {
+interface ProfilePageUIProps {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  imageUrl: string;
+}
+
+function ProfilePageUI({
+  firstName,
+  lastName,
+  email,
+  phoneNumber,
+  imageUrl,
+}: ProfilePageUIProps) {
   const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Stephen",
-    email: "john.stephen@example.com",
-    phoneNumber: "+1234567890",
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
     bio: "Financial enthusiast saving for a rainy day. Love using EzzySave to manage my goals!",
     notifications: {
       email: true,
@@ -23,11 +39,12 @@ function ProfilePageUI() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const { signOut } = useClerk();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -65,6 +82,7 @@ function ProfilePageUI() {
         {/* User Avatar and Name Section */}
         <div className="flex flex-col md:flex-row items-center space-x-4 p-6 bg-white rounded-xl shadow-lg border">
           <Avatar className="h-16 w-16 font-bold text-2xl">
+            <AvatarImage src={imageUrl} />
             <AvatarFallback className="bg-primary/20 text-primary">
               {profile.firstName.charAt(0)}
               {profile.lastName.charAt(0)}
@@ -137,6 +155,7 @@ function ProfilePageUI() {
               type="tel"
               value={profile.phoneNumber}
               onChange={handleChange}
+              placeholder="Enter your phone number"
               icon={<Phone className="h-5 w-5" />}
             />
           </div>
@@ -214,24 +233,47 @@ function ProfilePageUI() {
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
-          <Button
+          <CustomButton
             variant="secondary"
             size="lg"
             type="button"
             className="rounded-lg text-sm"
           >
             Cancel
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             type="submit"
             size="lg"
             disabled={isSaving}
             className="rounded-lg text-sm"
           >
             {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
+          </CustomButton>
         </div>
       </form>
+
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-red-200 dark:bg-gray-800 dark:border-red-700 space-y-4 mt-10">
+        <h3 className="text-xl font-semibold text-red-600 dark:text-red-400 border-b border-red-200 dark:border-red-700 pb-3">
+          Session & Security
+        </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <p className="text-gray-700 dark:text-gray-300">
+            Securely sign out of your EzzySave account.
+          </p>
+          <CustomButton
+            type="button"
+            variant="destructive"
+            onClick={async () => await signOut({ redirectUrl: "/" })}
+            // disabled={isSigningOut}
+            className="mt-4 sm:mt-0 text-sm"
+          >
+            <span className="flex items-center space-x-2">
+              <LogOut className="h-5 w-5" />
+              <span>Sign Out</span>
+            </span>
+          </CustomButton>
+        </div>
+      </div>
     </div>
   );
 }

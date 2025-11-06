@@ -2,8 +2,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AlertCircle } from "lucide-react";
+import { ComponentProps } from "react";
 
-export interface FormInputProps {
+export interface FormInputProps extends ComponentProps<typeof Input> {
   id: string;
   label: string;
   type?: string;
@@ -14,6 +16,7 @@ export interface FormInputProps {
   icon?: React.ReactNode;
   placeholder?: string;
   as?: "textarea";
+  error?: string | null;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -24,6 +27,7 @@ export const FormInput: React.FC<FormInputProps> = ({
   onChange,
   icon,
   placeholder,
+  error,
   as,
 }) => {
   const commonClasses = "w-full rounded-lg";
@@ -59,10 +63,19 @@ export const FormInput: React.FC<FormInputProps> = ({
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`${commonClasses} ${icon ? "pl-10" : "pl-4"}`}
+            className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} ${
+              error ? "border-red-500" : "border-gray-300"
+            }`}
           />
         )}
       </div>
+
+      {error && (
+        <p className="mt-1 flex items-center text-xs text-red-500">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {error}
+        </p>
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ const Footer: React.FC = () => (
     <div className="container mx-auto px-4 text-center">
       <div className="text-xl font-bold mb-4">EzzySave</div>
       <p className="text-sm text-gray-400">
-        Manage your money, achieve your goals. &copy; 2024 EzzySave. All rights
+        Manage your money, achieve your goals. &copy; 2025 EzzySave. All rights
         reserved.
       </p>
       <div className="mt-4 space-x-4 text-sm">

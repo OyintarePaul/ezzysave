@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { FormInput } from "../components/form-input";
+import { FormInput } from "../../../components/form-input";
 import { DollarSign } from "lucide-react";
 
 export default function LoanApplicationModal() {

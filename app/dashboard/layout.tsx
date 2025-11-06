@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import Header from "./components/header";
 import BottomNavigation from "./components/bottom-nav";
 import Sidebar from "./components/sidebar";
-import TopLoader from "./components/top-loader";
 
 export const metadata: Metadata = {
   title: { template: "%s | EzzySave", absolute: "EzzySave" },
@@ -32,7 +31,7 @@ export default async function DashboardLayout({
         {/* Bottom Navigation (Small screens) - Consumes router state via hook */}
         <BottomNavigation />
       </div>
-      <TopLoader />
+      
       <Toaster position="top-right" richColors />
     </>
   );
