@@ -143,7 +143,7 @@ const SavingsPlansPage: React.FC = () => {
           </p>
         </div>
         <Button asChild>
-          <Link href="dashboard/savings/new" className="mt-4 sm:mt-0">
+          <Link href="/dashboard/savings/new" className="mt-4 sm:mt-0">
             <Plus className="h-5 w-5" />
             <span>New Plan</span>
           </Link>

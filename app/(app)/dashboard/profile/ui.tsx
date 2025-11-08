@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { FormInput } from "../../../components/form-input";
+import { FormInput } from "../../../../components/form-input";
 import { Lock, LogOut, Mail, Phone, User } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,7 +44,7 @@ function ProfilePageUI({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
