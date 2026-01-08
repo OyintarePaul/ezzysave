@@ -1,8 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import PaystackPop from "@paystack/inline-js";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function wait(ms: number) {
@@ -10,9 +11,17 @@ export function wait(ms: number) {
 }
 
 export function progressBarColor(plan: string) {
-  return plan == "target" ? "bg-red-500" : plan == "fixed"  ? "bg-purple-500" : "bg-green-500";  
+  return plan == "target"
+    ? "bg-red-500"
+    : plan == "fixed"
+      ? "bg-purple-500"
+      : "bg-green-500";
 }
 
 export const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  }).format(amount);
 };
+

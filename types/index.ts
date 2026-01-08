@@ -39,7 +39,6 @@ export interface DetailRowProps {
     className?: string;
 }
 
-
 export interface NavItem {
     id: number;
     name: string;

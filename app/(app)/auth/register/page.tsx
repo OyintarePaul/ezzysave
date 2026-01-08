@@ -26,7 +26,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const { signUp, isLoaded } = useSignUp();
-  
+
   if (!isLoaded) {
     // Handle loading state
     return null;
@@ -168,6 +168,9 @@ const Register = () => {
                     : null
                 }
               />
+              
+              {/* Clerk's CAPTCHA widget */}
+              <div id="clerk-captcha" />
 
               {error && !successMessage && (
                 <div

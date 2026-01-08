@@ -4,13 +4,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle } from "lucide-react";
 import { ComponentProps } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface FormInputProps extends ComponentProps<typeof Input> {
   id: string;
   label: string;
   type?: string;
-  value: string | number;
-  onChange: (
+  value?: string | number;
+  onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   icon?: React.ReactNode;
@@ -114,3 +123,38 @@ export const FormCheckbox: React.FC<FormCheckboxProps> = ({
     </div>
   </div>
 );
+
+export const FormSelect: React.FC<{
+  name: string;
+  label: string;
+  value?: string;
+  className?: string;
+  options: { label: string; value: string }[];
+  onChange?: (value: string) => void;
+}> = ({ name, label, value, onChange, options, className }) => {
+  return (
+    <div className="space-y-2">
+      <Label
+        htmlFor={name}
+        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+      >
+        {label}
+      </Label>
+      <Select name={name} value={value} onValueChange={onChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select an option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>{label}</SelectLabel>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};

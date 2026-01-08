@@ -17,7 +17,7 @@ const LoginUI = () => {
   const { signIn, isLoaded, setActive } = useSignIn();
   const router = useRouter();
 
-  const handleLogin = async(e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Clear previous errors
 
@@ -33,9 +33,9 @@ const LoginUI = () => {
     }
 
     setIsLoading(true);
-     
+
     //perform sign-in
-    if(!isLoaded) return;
+    if (!isLoaded) return;
     try {
       const result = await signIn.create({
         identifier: email,
@@ -45,19 +45,21 @@ const LoginUI = () => {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         // Redirect to dashboard or home page after successful login
-        const redirectUrl = searchParams.get("returnTo") || "/dashboard/overview";
+        const redirectUrl =
+          searchParams.get("returnTo") || "/dashboard/overview";
         router.replace(redirectUrl);
       } else {
+        console.log(result.status);
         setError("Unexpected sign-in status. Please try again.");
       }
     } catch (err) {
       console.log(err);
-      setError("Login failed. Please try again.");
+      const errorMessage =
+        err instanceof Error ? err.message : "Login failed. Please try again.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-
-    
   };
 
   return (
@@ -104,6 +106,9 @@ const LoginUI = () => {
             error={error && !password ? "Password is required." : null}
           />
 
+          {/* Clerk's CAPTCHA widget */}
+          <div id="clerk-captcha" />
+
           {/* Global Error Display */}
           {error && email && password && (
             <div
@@ -147,10 +152,7 @@ const LoginUI = () => {
           {/* NEW Registration Link */}
           <p className="text-gray-500 dark:text-gray-400">
             Don't have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="font-medium text-primary"
-            >
+            <Link href="/auth/register" className="font-medium text-primary">
               Register here
             </Link>
           </p>

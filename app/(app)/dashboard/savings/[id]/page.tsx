@@ -1,24 +1,29 @@
 import { Button } from "@/components/ui/button";
-import { mockSavingsPlans, SavingsPlan, Transaction } from "@/constants/mock";
-import { pageAuthGuard } from "@/lib/auth";
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronLeft,
-  Lock,
-  Target,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { getCurrentUser, pageAuthGuard } from "@/lib/auth";
+import { ArrowDown, ChevronLeft, Lock, Target, Zap } from "lucide-react";
 import Link from "next/link";
+import { getPayload } from "payload";
+import config from "@payload-config";
+import { currentUser } from "@clerk/nextjs/server";
+import { SavingsPlan } from "@/payload-types";
+import DepositModal from "../deposit-modal";
+import { formatCurrency } from "@/lib/utils";
+import { notFound } from "next/navigation";
+import PlanTransactions from "./transactions";
+import { getPayloadCustomerByClerkId } from "@/lib/payload";
 
-const SavingsDetailPage: React.FC<{ planID: string }> = () => {
-  // For now, hardcode to display the first active plan's details
-  const plan: SavingsPlan = mockSavingsPlans[0];
-  const progress = (plan.currentAmount / plan.targetAmount) * 100;
-  const isFixed = plan.type === "Fixed";
+const SavingsDetailPage = async ({
+  planId,
+  userId,
+}: {
+  planId: string;
+  userId: string;
+}) => {
+  const plan = await getPlan(planId);
+  const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
+  const isFixed = plan.planType === "Fixed";
 
-  const getIconAndColor = (type: SavingsPlan["type"]) => {
+  const getIconAndColor = (type: SavingsPlan["planType"]) => {
     switch (type) {
       case "Target":
         return {
@@ -40,45 +45,28 @@ const SavingsDetailPage: React.FC<{ planID: string }> = () => {
         };
     }
   };
-  const { icon, barColor } = getIconAndColor(plan.type);
-
-  const getTransactionIcon = (type: Transaction["type"]) => {
-    switch (type) {
-      case "Deposit":
-        return <ArrowUp className="h-4 w-4 text-green-500" />;
-      case "Withdrawal":
-        return <ArrowDown className="h-4 w-4 text-red-500" />;
-      case "Interest":
-        return <TrendingUp className="h-4 w-4 text-yellow-500" />;
-    }
-  };
-
-  const getTransactionAmountClass = (type: Transaction["type"]) => {
-    switch (type) {
-      case "Deposit":
-        return "text-green-600 font-semibold";
-      case "Withdrawal":
-        return "text-red-600 font-semibold";
-      case "Interest":
-        return "text-yellow-600 font-semibold";
-    }
-  };
+  const { icon, barColor } = getIconAndColor(plan.planType);
 
   return (
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
       <header className="flex items-center space-x-4 mb-6">
-        <Button size="icon" variant="secondary" className="rounded-full" asChild>
-          <Link href="/savings">
-          <ChevronLeft />
+        <Button
+          size="icon"
+          variant="secondary"
+          className="rounded-full"
+          asChild
+        >
+          <Link href="/dashboard/savings">
+            <ChevronLeft />
           </Link>
         </Button>
         <div className="flex items-center space-x-3">
           <span className="hidden md:inline">{icon}</span>
           <h1 className="text-lg md:text-3xl font-bold text-gray-900 dark:text-white">
-            {plan.name}
+            {plan.planName}
           </h1>
           <span className="text-sm font-medium px-3 py-1 bg-primary/10 text-primary rounded-full ">
-            {plan.type} Plan
+            {plan.planType} Plan
           </span>
         </div>
       </header>
@@ -97,10 +85,10 @@ const SavingsDetailPage: React.FC<{ planID: string }> = () => {
 
             <div className="flex justify-between items-center mb-2">
               <p className="text-3xl md:text-4xl font-extrabold text-primary">
-                ${plan.currentAmount.toLocaleString()}
+                {formatCurrency(plan.currentBalance!)}
               </p>
               <p className="text-lg text-gray-500 dark:text-gray-400">
-                Goal: ${plan.targetAmount.toLocaleString()}
+                Goal: {formatCurrency(plan.targetAmount!)}
               </p>
             </div>
 
@@ -115,20 +103,20 @@ const SavingsDetailPage: React.FC<{ planID: string }> = () => {
                 <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                   <span>{progress.toFixed(1)}% Complete</span>
                   <span>
-                    ${(plan.targetAmount - plan.currentAmount).toLocaleString()}{" "}
+                    {formatCurrency(plan.targetAmount! - plan.currentBalance!)}{" "}
                     remaining
                   </span>
                 </div>
               </>
             )}
 
-            <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t dark:border-gray-700">
+            <div className="flex justify-between items-center gap-4 mt-6 pt-4 border-t dark:border-gray-700">
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Interest Rate (APY)
                 </p>
                 <p className="text-xl font-bold text-gray-900 dark:text-white">
-                  {plan.interestRate.toFixed(1)}%
+                  {plan.interestRate!.toFixed(1)}%
                 </p>
               </div>
               <div>
@@ -147,38 +135,7 @@ const SavingsDetailPage: React.FC<{ planID: string }> = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4 dark:text-white">
               Transaction History
             </h2>
-            <div className="space-y-3">
-              {plan.transactions?.length ? (
-                plan.transactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="flex justify-between items-center border-b pb-3 last:border-b-0 last:pb-0 dark:border-gray-700"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-700">
-                        {getTransactionIcon(tx.type)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {tx.description}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {tx.date}
-                        </p>
-                      </div>
-                    </div>
-                    <p className={getTransactionAmountClass(tx.type)}>
-                      {tx.amount > 0 ? `+` : `-`}$
-                      {Math.abs(tx.amount).toLocaleString()}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 italic">
-                  No transactions recorded for this plan yet.
-                </p>
-              )}
-            </div>
+            <PlanTransactions customerId={userId} planId={plan.id} />
           </div>
         </div>
 
@@ -189,10 +146,7 @@ const SavingsDetailPage: React.FC<{ planID: string }> = () => {
               Quick Actions
             </h2>
 
-            <button className="w-full py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition shadow-md flex items-center justify-center space-x-2">
-              <ArrowUp className="h-5 w-5" />
-              <span>Make a Deposit</span>
-            </button>
+            <DepositModal planId={plan.id} />
 
             <button className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition shadow-md flex items-center justify-center space-x-2">
               <ArrowDown className="h-5 w-5" />
@@ -221,5 +175,31 @@ export default async function SavingsPage({
 }) {
   const { id } = await params;
   await pageAuthGuard("/savings");
-  return <SavingsDetailPage planID={id} />;
+  const user = await getCurrentUser();
+  const customer = await getPayloadCustomerByClerkId(user.id);
+
+  if (!customer) {
+    throw new Error(`Customer with clerkId: ${user.id} not found`);
+  }
+
+  return <SavingsDetailPage planId={id} userId={user.id} />;
+}
+
+async function getPlan(planId: string) {
+  const payload = await getPayload({ config });
+  const user = await currentUser();
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const plan = await payload.findByID({
+    collection: "savings-plans",
+    id: planId,
+  });
+
+  if (!plan) {
+    notFound();
+  }
+
+  return plan;
 }

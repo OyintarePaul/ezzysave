@@ -68,6 +68,10 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    customers: Customer;
+    'savings-plans': SavingsPlan;
+    loans: Loan;
+    transactions: Transaction;
     media: Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +81,10 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'savings-plans': SavingsPlansSelect<false> | SavingsPlansSelect<true>;
+    loans: LoansSelect<false> | LoansSelect<true>;
+    transactions: TransactionsSelect<false> | TransactionsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -141,6 +149,76 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string | null;
+  clerkId: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "savings-plans".
+ */
+export interface SavingsPlan {
+  id: string;
+  planName: string;
+  customer?: (string | null) | Customer;
+  status?: ('Active' | 'Matured') | null;
+  planType: 'Target' | 'Fixed' | 'Daily';
+  currentBalance?: number | null;
+  interestEarned?: number | null;
+  interestRate?: number | null;
+  targetAmount?: number | null;
+  targetDate?: string | null;
+  fixedAmount?: number | null;
+  duration?: number | null;
+  maturityDate?: string | null;
+  dailyAmount?: number | null;
+  numberOfDays?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loans".
+ */
+export interface Loan {
+  id: string;
+  amount: number;
+  amountPaid?: number | null;
+  purpose: string;
+  interestRate?: number | null;
+  duration: number;
+  customer: string | Customer;
+  status?: ('pending' | 'approved' | 'rejected' | 'deferred' | 'paidOff') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transactions".
+ */
+export interface Transaction {
+  id: string;
+  description: string;
+  category?: ('Savings' | 'Loan' | 'Interest') | null;
+  type: 'Withdrawal' | 'Deposit' | 'Interest';
+  amount: number;
+  plan?: (string | null) | SavingsPlan;
+  loan?: (string | null) | Loan;
+  customer?: (string | null) | Customer;
+  paystackRef?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -185,6 +263,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null)
+    | ({
+        relationTo: 'savings-plans';
+        value: string | SavingsPlan;
+      } | null)
+    | ({
+        relationTo: 'loans';
+        value: string | Loan;
+      } | null)
+    | ({
+        relationTo: 'transactions';
+        value: string | Transaction;
       } | null)
     | ({
         relationTo: 'media';
@@ -253,6 +347,72 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  phone?: T;
+  clerkId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "savings-plans_select".
+ */
+export interface SavingsPlansSelect<T extends boolean = true> {
+  planName?: T;
+  customer?: T;
+  status?: T;
+  planType?: T;
+  currentBalance?: T;
+  interestEarned?: T;
+  interestRate?: T;
+  targetAmount?: T;
+  targetDate?: T;
+  fixedAmount?: T;
+  duration?: T;
+  maturityDate?: T;
+  dailyAmount?: T;
+  numberOfDays?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loans_select".
+ */
+export interface LoansSelect<T extends boolean = true> {
+  amount?: T;
+  amountPaid?: T;
+  purpose?: T;
+  interestRate?: T;
+  duration?: T;
+  customer?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transactions_select".
+ */
+export interface TransactionsSelect<T extends boolean = true> {
+  description?: T;
+  category?: T;
+  type?: T;
+  amount?: T;
+  plan?: T;
+  loan?: T;
+  customer?: T;
+  paystackRef?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

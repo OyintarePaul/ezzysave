@@ -3,7 +3,17 @@ import { formatCurrency } from "@/lib/utils";
 import { DollarSign } from "lucide-react";
 import Link from "next/link";
 
-const OverviewUI: React.FC = () => {
+interface OverviewUIProps {
+  stats: {
+    totalSaved: number;
+    totalTarget: number;
+    activePlans: number;
+    accruedInterest: number;
+    // loanAvailability: number;
+  };
+}
+
+const OverviewUI = ({ stats }: OverviewUIProps) => {
   return (
     // Added pb-20 padding to push content up above the fixed bottom navigation on mobile
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
@@ -18,20 +28,20 @@ const OverviewUI: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <OverviewCard
           title="Total Funds Saved"
-          value={0}
+          value={stats.totalSaved}
           description="+5.2% from last month"
           bgColor="bg-green-500"
         />
         <OverviewCard
           title="Target Savings Goal"
-          value={0}
-          description="2 active goals, 65% complete"
+          value={stats.totalTarget}
+          description={`${stats.activePlans} active goals, ${((stats.totalSaved / stats.totalTarget) * 100).toFixed(1)}% complete`}
           bgColor="bg-blue-500"
         />
         <OverviewCard
           title="Accrued Interest"
-          value={0}
-          description="Interest earned this quarter"
+          value={+stats.accruedInterest.toFixed(1)}
+          description="Interest earned this month"
           bgColor="bg-yellow-500"
         />
         <OverviewCard

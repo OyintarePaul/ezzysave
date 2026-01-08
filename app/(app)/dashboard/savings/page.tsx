@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { mockSavingsPlans, SavingsPlan } from "@/constants/mock";
 import { pageAuthGuard } from "@/lib/auth";
 import { formatCurrency } from "@/lib/utils";
+import { currentUser } from "@clerk/nextjs/server";
 import { CheckCircle, Info, Lock, Plus, Target, Zap } from "lucide-react";
 import Link from "next/link";
+import { getPayload } from "payload";
+import config from "@payload-config";
+import { SavingsPlan } from "@/payload-types";
 
 const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
-  const getIconAndColor = (type: SavingsPlan["type"]) => {
+  const getIconAndColor = (type: SavingsPlan["planType"]) => {
     switch (type) {
       case "Target":
         return {
@@ -29,10 +32,9 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
     }
   };
 
-  const { icon, color, barColor } = getIconAndColor(plan.type);
-  const progress = (plan.currentAmount / plan.targetAmount) * 100;
-  const isFixed = plan.type === "Fixed";
-
+  const { icon, color, barColor } = getIconAndColor(plan.planType);
+  const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
+  const isFixed = plan.planType === "Fixed";
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border hover:shadow-xl transition dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between">
       <div>
@@ -40,7 +42,7 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
           <div className="flex items-center space-x-3">
             {icon}
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {plan.name}
+              {plan.planName}
             </h3>
           </div>
           <span
@@ -55,27 +57,27 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
         </div>
 
         <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">
-          {plan.type} Savings Plan
+          {plan.planType} Savings Plan
         </p>
 
         {/* Progress Bar or Fixed amount display */}
         {isFixed ? (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
             <p className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatCurrency(plan.currentAmount)}
+              {formatCurrency(plan.currentBalance!)}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Locked for 6 months @ {plan.interestRate}% APY
+              Locked for {plan.duration} months @ {plan.interestRate}% APY
             </p>
           </div>
         ) : (
           <>
             <div className="flex justify-between text-sm mb-1">
               <span className="font-medium text-gray-900 dark:text-white">
-                {formatCurrency(plan.currentAmount)} Saved
+                {formatCurrency(plan.currentBalance!)} Saved
               </span>
               <span className="text-gray-500 dark:text-gray-400">
-                Goal: {formatCurrency(plan.targetAmount)}
+                Goal: {formatCurrency(plan.targetAmount!)}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
@@ -93,7 +95,7 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
 
       <div className="mt-6 flex justify-end">
         <Button size="sm" variant="link" asChild>
-          <Link href="/savings/1">View Details →</Link>
+          <Link href={`/dashboard/savings/${plan.id}`}>View Details →</Link>
         </Button>
       </div>
     </div>
@@ -106,22 +108,28 @@ const MaturedPlanListItem: React.FC<{ plan: SavingsPlan }> = ({ plan }) => (
     <div className="flex items-center space-x-3">
       <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
       <div>
-        <p className="font-medium text-gray-900 dark:text-white">{plan.name}</p>
-        <p className="text-sm text-gray-500">Matured on: 2024/09/15</p>
+        <p className="font-medium text-gray-900 dark:text-white">
+          {plan.planName}
+        </p>
+        <p className="text-sm text-gray-500">
+          Matured on: {new Date(plan.updatedAt).toLocaleDateString()}
+        </p>
       </div>
     </div>
     <div className="text-right">
       <p className="font-semibold text-lg text-gray-700 dark:text-gray-300">
-        {formatCurrency(plan.targetAmount + (plan.targetAmount * plan.interestRate) / 100)}
+        {formatCurrency(
+          plan.targetAmount! + (plan.targetAmount! * plan.interestRate!) / 100
+        )}
       </p>
       <p className="text-xs text-gray-500">Final Payout</p>
     </div>
   </div>
 );
 
-const SavingsPlansPage: React.FC = () => {
-  const activePlans = mockSavingsPlans.filter((p) => p.status === "Active");
-  const maturedPlans = mockSavingsPlans.filter((p) => p.status === "Matured");
+const SavingsPlansPage = ({ plans }: { plans: SavingsPlan[] }) => {
+  const activePlans = plans.filter((p) => p.status === "Active");
+  const maturedPlans = plans.filter((p) => p.status === "Matured");
 
   return (
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
@@ -192,5 +200,37 @@ const SavingsPlansPage: React.FC = () => {
 
 export default async function SavingsPage() {
   await pageAuthGuard("/dashboard/savings");
-  return <SavingsPlansPage />;
+  let plans;
+  try {
+    plans = await getSavingsPlans();
+  } catch (error) {
+    console.error("Error fetching savings plans:", error);
+    return null;
+  }
+
+  return <SavingsPlansPage plans={plans} />;
+}
+
+async function getSavingsPlans() {
+  const payload = await getPayload({ config });
+  const user = await currentUser();
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const customer = await payload.find({
+    collection: "customers",
+    where: {
+      clerkId: { equals: user.id },
+    },
+  });
+
+  const plans = await payload.find({
+    collection: "savings-plans",
+    where: {
+      customer: { equals: customer.docs[0].id },
+    },
+  });
+
+  return plans.docs;
 }

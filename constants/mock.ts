@@ -15,7 +15,7 @@ export interface Transaction {
   description: string;
   amount: number;
   type: "Deposit" | "Withdrawal" | "Interest";
-  category?: "Savings" | "Loans" | "General";
+  category?: "Savings" | "Loans" | "Interest";
   status?: "Completed" | "Pending" | "Failed";
 }
 
@@ -34,7 +34,7 @@ export const mockTransactions: Transaction[] = [
     date: "2024-10-24",
     description: "Withdrawal for Rent",
     type: "Withdrawal",
-    category: "General",
+    category: "Interest",
     amount: -1200.0,
     status: "Completed",
   },
@@ -70,7 +70,7 @@ export const mockTransactions: Transaction[] = [
     date: "2024-10-20",
     description: "ATM Withdrawal",
     type: "Withdrawal",
-    category: "General",
+    category: "Interest",
     amount: -200.0,
     status: "Completed",
   },

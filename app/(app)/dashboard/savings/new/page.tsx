@@ -1,8 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/custom-button";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { formatCurrency } from "@/lib/utils";
+import { getPaymentLink } from "@/server-actions/payments";
+import { createSavingsPlan } from "@/server-actions/savings-plans";
 import {
   CheckCircle,
   DollarSign,
@@ -12,14 +14,15 @@ import {
   Zap,
   Lock,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface SavingsFormData {
   planType: "Daily" | "Target" | "Fixed";
   planName: string;
   initialDeposit: number;
   // Fixed specific
-  termMonths?: number;
+  fixedAmount?: number;
+  duration?: number;
   // Target specific
   targetAmount?: number;
   targetDate?: string;
@@ -29,6 +32,7 @@ interface SavingsFormData {
 }
 
 const CreateSavingsPlanPage: React.FC = () => {
+  const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<SavingsFormData>({
     planType: "Target",
     planName: "",
@@ -39,9 +43,9 @@ const CreateSavingsPlanPage: React.FC = () => {
       .substring(0, 10),
     dailyAmount: 5,
     dailyDays: 365,
-    termMonths: 12,
+    fixedAmount: 100,
+    duration: 12,
   });
-  const [isLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error" | "info";
     text: string;
@@ -83,6 +87,48 @@ const CreateSavingsPlanPage: React.FC = () => {
       planType: newType,
     }));
     setStatusMessage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatusMessage(null);
+    startTransition(async () => {
+      const response = await createSavingsPlan({
+        planName: formData.planName,
+        planType: formData.planType,
+        targetAmount: formData.targetAmount || 0,
+        targetDate: formData.targetDate || "",
+        fixedAmount: formData.fixedAmount || 0,
+        duration: formData.duration || 0,
+        dailyAmount: formData.dailyAmount || 0,
+        numberOfDays: formData.dailyDays || 0,
+      });
+
+      if (response.status == "error") {
+        setStatusMessage({
+          type: "error",
+          text: response.message,
+        });
+        return;
+      }
+
+      const res = await getPaymentLink(formData.initialDeposit, {
+        planId: response.data.id,
+      });
+
+      if (!res.success) {
+        setStatusMessage({
+          type: "error",
+          text: "Unable to redirect to payment. You can contine payment on the savings page",
+        });
+        return;
+      }
+      setStatusMessage({
+        type: "success",
+        text: "Savings plan created successfully! Redirecting to payment...",
+      });
+      window.location.href = res.link;
+    });
   };
 
   const renderTypeSpecificFields = () => {
@@ -153,22 +199,22 @@ const CreateSavingsPlanPage: React.FC = () => {
         </div>
       );
     } else if (type === PLAN_TYPES.FIXED) {
-      const termMonths = formData.termMonths || 12;
+      const duration = formData.duration || 12;
       const rateFixed = (
-        termMonths >= 24 ? 5.5 : termMonths >= 12 ? 4.0 : 3.0
+        duration >= 24 ? 5.5 : duration >= 12 ? 4.0 : 3.0
       ).toFixed(1);
       return (
         <div className="space-y-4">
           <InputGroup
-            value={formData["termMonths"] as number}
+            value={formData["duration"] as number}
             handleChange={handleChange}
-            id="termMonths"
-            label="Investment Term"
-            name="termMonths"
+            id="duration"
+            label="Duration"
+            name="duration"
             isSelect={true}
           />
           <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-sm text-blue-800 dark:text-blue-300 font-semibold flex justify-between items-center">
-            <p>Guaranteed APY for {termMonths} months:</p>
+            <p>Guaranteed APY for {duration} months:</p>
             <p className="text-lg">{rateFixed}%</p>
           </div>
         </div>
@@ -215,7 +261,7 @@ const CreateSavingsPlanPage: React.FC = () => {
           </div>
         )}
 
-        <form className="space-y-8">
+        <form className="space-y-8" onSubmit={handleSubmit}>
           {/* Step 2: Plan Details */}
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
@@ -238,7 +284,7 @@ const CreateSavingsPlanPage: React.FC = () => {
                   onChange={handleChange}
                   placeholder="e.g., Vacation, Down Payment"
                   required
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -258,7 +304,7 @@ const CreateSavingsPlanPage: React.FC = () => {
                   onChange={handleChange}
                   min="0"
                   required
-                  disabled={isLoading}
+                  disabled={isPending}
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 bg-white dark:bg-gray-700 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -275,18 +321,17 @@ const CreateSavingsPlanPage: React.FC = () => {
           </div>
 
           {/* Submit Button */}
-          <Button
-            type="submit"
+          <CustomButton
             disabled={
-              isLoading || !formData.planName || formData.initialDeposit < 0
+              isPending || !formData.planName || formData.initialDeposit < 0
             }
             className={`w-full flex justify-center items-center py-3 px-4 shadow-lg text-base ${
-              isLoading
+              isPending
                 ? "bg-primary/40 text-primary-foreground"
                 : "transform hover:scale-[1.005]"
             }`}
           >
-            {isLoading ? (
+            {isPending ? (
               <>
                 <Spinner />
                 Creating Plan...
@@ -294,7 +339,7 @@ const CreateSavingsPlanPage: React.FC = () => {
             ) : (
               `Confirm & Launch ${formData.planType} Plan`
             )}
-          </Button>
+          </CustomButton>
         </form>
       </Card>
     </div>
@@ -308,7 +353,7 @@ const PlanTypeSelector: React.FC<{
   const types = [
     {
       type: "Target",
-      name: "Goal Saver",
+      name: "Target Savings",
       icon: Target,
       color: "text-green-500",
       description:
@@ -324,11 +369,11 @@ const PlanTypeSelector: React.FC<{
     },
     {
       type: "Daily",
-      name: "Micro Saver",
+      name: "Daily Savings",
       icon: Zap,
       color: "text-yellow-500",
       description:
-        "Set small, automated daily contributions to build savings habits effortlessly.",
+        "Set small, daily contributions to build savings habits effortlessly.",
     },
   ] as const;
 
@@ -342,15 +387,13 @@ const PlanTypeSelector: React.FC<{
           <button
             key={type}
             onClick={() => onChange(type)}
-            className={`
-                            p-4 rounded-xl text-left transition-all duration-300 transform
-                            focus:outline-none focus:ring-4 focus:ring-primary/50
-                            
-                            ${
-                              isSelected
-                                ? "bg-primary/10 border-2 border-primary/60 shadow-lg scale-[1.01]"
-                                : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:shadow-md"
-                            }
+            className={`p-4 rounded-xl text-left transition-all duration-300 transform
+                        focus:outline-none focus:ring-4 focus:ring-primary/50
+                        ${
+                          isSelected
+                            ? "bg-primary/10 border-2 border-primary/60 shadow-lg scale-[1.01]"
+                            : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 hover:shadow-md"
+                        }
                         `}
           >
             <div className="flex items-center space-x-3 mb-2">
