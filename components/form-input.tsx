@@ -20,7 +20,7 @@ export interface FormInputProps extends ComponentProps<typeof Input> {
   type?: string;
   value?: string | number;
   onChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void;
   icon?: React.ReactNode;
   placeholder?: string;

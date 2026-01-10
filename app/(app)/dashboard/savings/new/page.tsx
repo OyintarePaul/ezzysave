@@ -1,5 +1,6 @@
 "use client";
 import CustomButton from "@/components/custom-button";
+import { FormInput } from "@/components/form-input";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { formatCurrency } from "@/lib/utils";

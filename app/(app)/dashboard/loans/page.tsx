@@ -5,7 +5,10 @@ import LoansList from "./LoansList";
 import { Suspense } from "react";
 import CustomButton from "@/components/custom-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getLoansForCustomer, getPayloadCustomerByClerkId } from "@/lib/payload";
+import {
+  getLoansForCustomer,
+  getPayloadCustomerByClerkId,
+} from "@/lib/payload";
 
 const LoanApplicationSection = ({
   hasPendingLoan,
