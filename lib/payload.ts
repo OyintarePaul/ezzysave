@@ -1,3 +1,4 @@
+import "server-only";
 import { getPayload, Where } from "payload";
 import config from "@/payload.config";
 

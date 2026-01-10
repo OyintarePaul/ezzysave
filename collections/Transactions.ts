@@ -15,7 +15,7 @@ export const Transactions: CollectionConfig = {
     {
       name: "category",
       type: "select",
-      options: ["Savings", "Loan", "Interest"],
+      options: ["Savings", "Loans", "Interests"],
     },
 
     {

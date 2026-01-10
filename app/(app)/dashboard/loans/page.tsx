@@ -5,7 +5,7 @@ import LoansList from "./LoansList";
 import { Suspense } from "react";
 import CustomButton from "@/components/custom-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getLoansForUser, getPayloadCustomerByClerkId } from "@/lib/payload";
+import { getLoansForCustomer, getPayloadCustomerByClerkId } from "@/lib/payload";
 
 const LoanApplicationSection = ({
   hasPendingLoan,
@@ -69,7 +69,7 @@ const Loans = async () => {
   if (!customer) {
     throw new Error("Customer not found");
   }
-  const loans = await getLoansForUser(customer.id);
+  const loans = await getLoansForCustomer(customer.id);
   const pendingLoans = loans.filter((l) => l.status === "pending");
 
   return (

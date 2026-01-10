@@ -42,8 +42,9 @@ export const Loans: CollectionConfig = {
       type: "select",
       options: [
         { label: "Pending", value: "pending" },
-        { label: "Approved", value: "approved" },
-        { label: "Rejected", value: "rejected" },
+        { label: "Active", value: "active" },
+        { label: "Approve", value: "approved" },
+        { label: "Reject", value: "rejected" },
         { label: "Deferred", value: "deferred" },
         { label: "Paid Off", value: "paidOff" },
       ],

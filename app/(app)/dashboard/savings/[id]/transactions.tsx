@@ -1,4 +1,5 @@
 import { getTransactions } from "@/lib/payload";
+import { formatDate } from "@/lib/utils";
 import { Transaction } from "@/payload-types";
 import { ArrowDown, ArrowUp, TrendingUp } from "lucide-react";
 
@@ -11,7 +12,7 @@ export default async function PlanTransactions({
 }) {
   const transactions = await getTransactions(customerId, planId);
 
-  console.log(transactions)
+  console.log(transactions);
 
   const getTransactionIcon = (type: Transaction["type"]) => {
     switch (type) {
@@ -52,7 +53,7 @@ export default async function PlanTransactions({
                   {tx.description}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(tx.createdAt).toLocaleDateString()}
+                  {formatDate(new Date(tx.createdAt))}
                 </p>
               </div>
             </div>

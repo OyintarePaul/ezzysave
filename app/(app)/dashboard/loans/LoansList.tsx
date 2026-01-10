@@ -6,7 +6,7 @@ import MakePayment from "./make-payment";
 
 export default async function LoansList({ loans }: { loans: Loan[] }) {
   const activeLoans = loans.filter(
-    (l) => l.status === "approved" || l.status === "deferred"
+    (l) => l.status === "active" || l.status === "deferred"
   );
   const paidLoans = loans.filter((l) => l.status === "paidOff");
 

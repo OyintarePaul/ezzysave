@@ -25,3 +25,12 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+export const formatDate = (date: Date): string => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  return formatter.format(date);
+};

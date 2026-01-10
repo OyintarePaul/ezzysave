@@ -196,7 +196,7 @@ export interface Loan {
   interestRate?: number | null;
   duration: number;
   customer: string | Customer;
-  status?: ('pending' | 'approved' | 'rejected' | 'deferred' | 'paidOff') | null;
+  status?: ('pending' | 'active' | 'approved' | 'rejected' | 'deferred' | 'paidOff') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -207,7 +207,7 @@ export interface Loan {
 export interface Transaction {
   id: string;
   description: string;
-  category?: ('Savings' | 'Loan' | 'Interest') | null;
+  category?: ('Savings' | 'Loans' | 'Interests') | null;
   type: 'Withdrawal' | 'Deposit' | 'Interest';
   amount: number;
   plan?: (string | null) | SavingsPlan;

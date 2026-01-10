@@ -1,14 +1,12 @@
 "use client";
 import CustomButton from "@/components/custom-button";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { Transaction } from "@/payload-types";
 import {
   ArrowDownLeft,
   ArrowUpRight,
   Banknote,
-  CheckCircle,
   CircleCheck,
-  Clock,
   DollarSign,
   Filter,
   TrendingUp,
@@ -134,14 +132,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction }) => {
             {transaction.description}
           </p>
           {/* Compact date and category display */}
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 space-x-1">
-            <span className="font-medium">
-              {new Date(transaction.createdAt).toLocaleTimeString()}
-            </span>
-            <span className="text-gray-300 dark:text-gray-500">&bull;</span>
-            <span className="uppercase text-xs font-medium text-primary-500">
-              {transaction.category}
-            </span>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5 space-x-1">
+            {formatDate(new Date(transaction.createdAt))}
           </p>
         </div>
       </div>
