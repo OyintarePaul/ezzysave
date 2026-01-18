@@ -12,8 +12,6 @@ export default async function PlanTransactions({
 }) {
   const transactions = await getTransactions(customerId, planId);
 
-  console.log(transactions);
-
   const getTransactionIcon = (type: Transaction["type"]) => {
     switch (type) {
       case "Deposit":

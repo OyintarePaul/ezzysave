@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export async function pageAuthGuard(path: string) {
@@ -14,4 +14,18 @@ export async function getCurrentUser() {
     throw new Error("User not authenticated");
   }
   return user;
+}
+
+export async function verifyPassword(userId: string, password: string) {
+  try {
+    const client = await clerkClient();
+    const { verified } = await client.users.verifyPassword({
+      password,
+      userId,
+    });
+
+    return verified;
+  } catch (error) {
+    return false;
+  }
 }

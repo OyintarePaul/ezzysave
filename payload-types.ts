@@ -158,6 +158,11 @@ export interface Customer {
   email: string;
   phone?: string | null;
   clerkId: string;
+  accountNumber?: string | null;
+  accountName?: string | null;
+  recipientCode?: string | null;
+  bankCode?: string | null;
+  withdrawalPin?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -358,6 +363,11 @@ export interface CustomersSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   clerkId?: T;
+  accountNumber?: T;
+  accountName?: T;
+  recipientCode?: T;
+  bankCode?: T;
+  withdrawalPin?: T;
   updatedAt?: T;
   createdAt?: T;
 }

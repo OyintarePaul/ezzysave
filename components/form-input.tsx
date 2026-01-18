@@ -20,7 +20,7 @@ export interface FormInputProps extends ComponentProps<typeof Input> {
   type?: string;
   value?: string | number;
   onChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   icon?: React.ReactNode;
   placeholder?: string;
@@ -38,6 +38,8 @@ export const FormInput: React.FC<FormInputProps> = ({
   placeholder,
   error,
   as,
+  readOnly,
+  ...props
 }) => {
   const commonClasses = "w-full rounded-lg";
 
@@ -57,6 +59,7 @@ export const FormInput: React.FC<FormInputProps> = ({
         )}
         {as === "textarea" ? (
           <Textarea
+            readOnly={readOnly}
             id={id}
             name={id}
             value={value as string}
@@ -66,10 +69,12 @@ export const FormInput: React.FC<FormInputProps> = ({
           />
         ) : (
           <Input
+            {...props}
             id={id}
             name={id}
             type={type}
             value={value}
+            readOnly={readOnly}
             onChange={onChange}
             placeholder={placeholder}
             className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} ${
@@ -129,9 +134,10 @@ export const FormSelect: React.FC<{
   label: string;
   value?: string;
   className?: string;
+  icon: React.ReactNode;
   options: { label: string; value: string }[];
   onChange?: (value: string) => void;
-}> = ({ name, label, value, onChange, options, className }) => {
+}> = ({ name, label, value, onChange, options, className, icon }) => {
   return (
     <div className="space-y-2">
       <Label
@@ -141,8 +147,11 @@ export const FormSelect: React.FC<{
         {label}
       </Label>
       <Select name={name} value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select an option" />
+        <SelectTrigger className="w-full rounded-lg">
+          <div className="flex gap-2 items-center">
+            {icon}
+            <SelectValue placeholder="Select an option" />
+          </div>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>

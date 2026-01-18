@@ -36,33 +36,31 @@ export const POST = async (req: NextRequest) => {
   // We are good to go
   const { reference, metadata, amount } = body.data;
 
-  // Verify transaction
-  const verifyResponse = await verifyPaystackTransaction(reference);
-  if (!verifyResponse.status) {
-    console.log(`Failed to verify transaction with reference ${reference}.`);
-    console.log("Verification response:", verifyResponse);
-    return new Response(
-      JSON.stringify({ message: "Transaction verification failed" }),
-      { status: 200 }
-    );
-  }
-
-  if (verifyResponse.data.status !== "success") {
-    console.log(`Payment with reference ${reference} not successful.`);
-    return new Response(JSON.stringify({ message: "Payment not successful" }), {
-      status: 200,
-    });
-  }
-
   // Handle the event (e.g., payment successful)
   if (body.event === "charge.success") {
+    // Verify transaction
+    const verifyResponse = await verifyPaystackTransaction(reference);
+    if (!verifyResponse.status) {
+      console.log(`Failed to verify transaction with reference ${reference}.`);
+      console.log("Verification response:", verifyResponse);
+      return new Response(
+        JSON.stringify({ message: "Transaction verification failed" }),
+        { status: 200 }
+      );
+    }
+
+    if (verifyResponse.data.status !== "success") {
+      console.log(`Payment with reference ${reference} not successful.`);
+      return new Response(
+        JSON.stringify({ message: "Payment not successful" }),
+        {
+          status: 200,
+        }
+      );
+    }
     return handleChargeSuccess({ metadata, amount, reference });
   } else if (body.event === "transfer.success") {
-    return handleChargeSuccess({
-      metadata,
-      amount,
-      reference,
-    });
+    return handleTransferSuccess({ metadata, amount, reference });
   }
 
   return new Response(

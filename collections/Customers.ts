@@ -36,5 +36,30 @@ export const Customers: CollectionConfig = {
         hidden: true,
       },
     },
+
+    {
+      name: "accountNumber",
+      type: "text",
+    },
+    {
+      name: "accountName",
+      type: "text",
+    },
+    {
+      name: "recipientCode",
+      type: "text",
+    },
+    {
+      name: "bankCode",
+      type: "text",
+    },
+
+    {
+      name: "withdrawalPin",
+      type: "text",
+      admin: {
+        hidden: true,
+      },
+    },
   ],
 };

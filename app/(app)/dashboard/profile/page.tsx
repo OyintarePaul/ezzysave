@@ -1,11 +1,18 @@
 import { pageAuthGuard } from "@/lib/auth";
-import ProfilePageUI from "./ui";
+import SignOut from "./SignOut";
+import WithdrawalPin from "./WithdrawalPin";
+import Bank from "./Bank";
+import Profile from "./Profile";
+import { listBanks } from "@/lib/paystack";
+import UserAvatar from "./Avatar";
+
 import { currentUser } from "@clerk/nextjs/server";
 
 const ProfilePage: React.FC = async () => {
   await pageAuthGuard("/profile");
   const user = await currentUser();
-  if(!user) return null;
+  if (!user) return null;
+  const bankList = await listBanks();
 
   const userInfo = {
     firstName: user.firstName || "",
@@ -13,8 +20,22 @@ const ProfilePage: React.FC = async () => {
     email: user.emailAddresses[0]?.emailAddress || "",
     phoneNumber: user.phoneNumbers[0]?.phoneNumber || "",
     imageUrl: user.imageUrl || "",
-  }
-  return <ProfilePageUI {...userInfo} />;
+  };
+  return (
+    <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        Profile Settings
+      </h1>
+
+      <div className="space-y-10">
+        <UserAvatar {...userInfo} />
+        <Profile {...userInfo} />
+        <WithdrawalPin />
+        <Bank bankList={bankList.data} />
+        <SignOut />
+      </div>
+    </div>
+  );
 };
 
 export default ProfilePage;

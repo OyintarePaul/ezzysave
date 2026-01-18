@@ -1,6 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { getCurrentUser, pageAuthGuard } from "@/lib/auth";
-import { ArrowDown, ChevronLeft, Lock, Target, Zap } from "lucide-react";
+import {
+  ArrowDown,
+  Calendar,
+  ChevronLeft,
+  Lock,
+  Rocket,
+  Target,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { getPayload } from "payload";
 import config from "@payload-config";
@@ -11,6 +20,7 @@ import { formatCurrency } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import PlanTransactions from "./transactions";
 import { getPayloadCustomerByClerkId } from "@/lib/payload";
+import DailyContributionTracker from "./DailyContributionTracker";
 
 const SavingsDetailPage = async ({
   planId,
@@ -20,6 +30,7 @@ const SavingsDetailPage = async ({
   userId: string;
 }) => {
   const plan = await getPlan(planId);
+  const isDaily = plan.planType === "Daily";
   const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
   const isFixed = plan.planType === "Fixed";
 
@@ -129,6 +140,9 @@ const SavingsDetailPage = async ({
               </div>
             </div>
           </div>
+
+          {/* Contribution Tracker */}
+          {isDaily ? <DailyContributionTracker plan={plan} /> : null}
 
           {/* Transaction History */}
           <div className="bg-white p-6 rounded-xl shadow-lg border dark:bg-gray-800 dark:border-gray-700">

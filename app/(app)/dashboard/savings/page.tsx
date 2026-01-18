@@ -16,23 +16,26 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
           icon: <Target className="h-6 w-6 text-green-500" />,
           color: "text-green-500",
           barColor: "bg-green-500",
+          bgColor: "bg-green-100"
         };
       case "Fixed":
         return {
           icon: <Lock className="h-6 w-6 text-blue-500" />,
           color: "text-blue-500",
           barColor: "bg-blue-500",
+          bgColor: "bg-blue-100"
         };
       case "Daily":
         return {
           icon: <Zap className="h-6 w-6 text-yellow-500" />,
           color: "text-yellow-500",
           barColor: "bg-yellow-500",
+          bgColor: "bg-yellow-100"
         };
     }
   };
 
-  const { icon, color, barColor } = getIconAndColor(plan.planType);
+  const { icon, color, barColor, bgColor } = getIconAndColor(plan.planType);
   const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
   const isFixed = plan.planType === "Fixed";
   return (
@@ -46,13 +49,13 @@ const SavingsPlanCard: React.FC<{ plan: SavingsPlan }> = ({ plan }) => {
             </h3>
           </div>
           <span
-            className={`text-xs font-medium px-2 py-1 rounded-full ${color} ${
+            className={`text-xs font-medium px-3 py-1 rounded-full ${color} ${
               plan.status === "Active"
-                ? "bg-opacity-20 bg-blue-100"
+                ? `bg-opacity-20 ${bgColor}`
                 : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
             }`}
           >
-            {plan.status}
+            {plan.planType}
           </span>
         </div>
 

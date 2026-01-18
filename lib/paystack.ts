@@ -50,7 +50,7 @@ export const initPaystack = async ({
         Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -70,7 +70,7 @@ export const verifyPaystackTransaction = async (reference: string) => {
         Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -99,7 +99,7 @@ export const handleChargeSuccess = async ({
   try {
     // Update your database or perform necessary actions here
     console.log(
-      `Payment verified for reference ${reference}. Updating records...`
+      `Payment verified for reference ${reference}. Updating records...`,
     );
 
     if (metadata?.planId) {
@@ -113,7 +113,7 @@ export const handleChargeSuccess = async ({
         console.log(`No existing record found for plan ID ${metadata.planId}.`);
         return new Response(
           JSON.stringify({ message: "No existing record found" }),
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -148,10 +148,10 @@ export const handleChargeSuccess = async ({
         await Promise.allSettled([updatePlanPromise, createTransactionPromise]);
 
       console.log(
-        `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`
+        `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
+        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
       );
       return new Response(
         JSON.stringify({
@@ -159,7 +159,7 @@ export const handleChargeSuccess = async ({
         }),
         {
           status: 200,
-        }
+        },
       );
     } else if (metadata?.loanId) {
       // It's a loan transaction
@@ -173,7 +173,7 @@ export const handleChargeSuccess = async ({
         console.log(`No existing record found for loan ID ${metadata.loanId}.`);
         return new Response(
           JSON.stringify({ message: "No existing record found" }),
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -205,10 +205,10 @@ export const handleChargeSuccess = async ({
         await Promise.allSettled([updateLoanPromise, createTransactionPromise]);
 
       console.log(
-        `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`
+        `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
+        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
       );
     }
     return new Response(
@@ -217,18 +217,18 @@ export const handleChargeSuccess = async ({
       }),
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error(
       `Error updating payment record for reference ${reference}:`,
-      error
+      error,
     );
     return new Response(
       JSON.stringify({
         message: "Something went wrong. Unable to process webhook",
       }),
-      { status: 401 }
+      { status: 401 },
     );
   }
 };
@@ -250,7 +250,7 @@ export const handleTransferSuccess = async ({
   try {
     // Update your database or perform necessary actions here
     console.log(
-      `Payment verified for reference ${reference}. Updating records...`
+      `Payment verified for reference ${reference}. Updating records...`,
     );
 
     if (metadata?.planId) {
@@ -264,7 +264,7 @@ export const handleTransferSuccess = async ({
         console.log(`No existing record found for plan ID ${metadata.planId}.`);
         return new Response(
           JSON.stringify({ message: "No existing record found" }),
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -299,10 +299,10 @@ export const handleTransferSuccess = async ({
         await Promise.allSettled([updatePlanPromise, createTransactionPromise]);
 
       console.log(
-        `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`
+        `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
+        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
       );
       return new Response(
         JSON.stringify({
@@ -310,7 +310,7 @@ export const handleTransferSuccess = async ({
         }),
         {
           status: 200,
-        }
+        },
       );
     } else if (metadata?.loanId) {
       // It's a loan transaction
@@ -324,7 +324,7 @@ export const handleTransferSuccess = async ({
         console.log(`No existing record found for loan ID ${metadata.loanId}.`);
         return new Response(
           JSON.stringify({ message: "No existing record found" }),
-          { status: 200 }
+          { status: 200 },
         );
       }
 
@@ -356,10 +356,10 @@ export const handleTransferSuccess = async ({
         await Promise.allSettled([updateLoanPromise, createTransactionPromise]);
 
       console.log(
-        `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`
+        `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
+        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
       );
     }
     return new Response(
@@ -368,178 +368,81 @@ export const handleTransferSuccess = async ({
       }),
       {
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error(
       `Error updating payment record for reference ${reference}:`,
-      error
+      error,
     );
     return new Response(
       JSON.stringify({
         message: "Something went wrong. Unable to process webhook",
       }),
-      { status: 401 }
+      { status: 401 },
     );
   }
 };
 
-// export const handleChargeSuccess = async ({
-//   amount,
-//   metadata,
-//   reference,
-//   isOutgoing = false,
-// }: {
-//   amount: number;
-//   metadata: {
-//     planId?: string;
-//     loanId?: number;
-//   };
-//   reference: string;
-//   isOutgoing?: boolean;
-// }) => {
-//   // Payment is successful and verified
-//   const amountInNaira = amount / 100;
-//   const payload = await getPayloadClient();
-//   try {
-//     // Update your database or perform necessary actions here
-//     console.log(
-//       `Payment verified for reference ${reference}. Updating records...`
-//     );
+export async function listBanks() {
+  const response = await fetch("https://api.paystack.co/bank?currency=NGN", {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+    },
+  });
 
-//     if (metadata?.planId) {
-//       // It's a plan transaction
-//       const plan = await payload.findByID({
-//         collection: "savings-plans",
-//         id: metadata?.planId,
-//       });
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Paystack initialization error:", errorData);
+    throw new Error(`Paystack initialization failed: ${response.statusText}`);
+  }
+  return response.json();
+}
 
-//       if (!plan) {
-//         console.log(`No existing record found for plan ID ${metadata.planId}.`);
-//         return new Response(
-//           JSON.stringify({ message: "No existing record found" }),
-//           { status: 200 }
-//         );
-//       }
+export async function resolveAccount(accountNumber: string, bankCode: string) {
+  const response = await fetch(
+    `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+      },
+    },
+  );
 
-//       const newBalance = isOutgoing
-//         ? plan.currentBalance! - amountInNaira
-//         : plan.currentBalance! + amountInNaira;
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Paystack initialization error:", errorData);
+    throw new Error(`Paystack initialization failed: ${response.statusText}`);
+  }
+  return response.json();
+}
 
-//       //Update a payment record in Payload CMS
-//       const updatePlanPromise = payload.update({
-//         collection: "savings-plans",
-//         id: metadata.planId,
-//         data: {
-//           currentBalance: newBalance,
-//           status: newBalance >= plan.targetAmount! ? "Matured" : "Active",
-//         },
-//       });
+export async function createRecipientCode(
+  accountNumber: string,
+  bankCode: string,
+  accountName: string,
+) {
+  const response = await fetch("https://api.paystack.co/transferrecipient", {
+    method: "POST",
+    body: JSON.stringify({
+      type: "nuban",
+      name: accountName,
+      account_number: accountNumber,
+      bank_code: bankCode,
+      currency: "NGN",
+    }),
+    headers: {
+      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+      "Content-Type": "application/json",
+    },
+  });
 
-//       // create a new transaction
-//       const createTransactionPromise = payload.create({
-//         collection: "transactions",
-//         data: {
-//           amount: amountInNaira,
-//           category: "Savings",
-//           description: `${plan.planType} Savings ${isOutgoing ? "Withdrawal" : "Deposit"}: ${plan.planName}`,
-//           paystackRef: reference,
-//           plan: plan.id,
-//           customer: plan.customer,
-//           type: isOutgoing ? "Withdrawal" : "Deposit",
-//         },
-//       });
-
-//       //run both savings and transaction at the same time
-//       const [updatePlanResult, createTransactionResult] =
-//         await Promise.allSettled([updatePlanPromise, createTransactionPromise]);
-
-//       console.log(
-//         `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`
-//       );
-//       console.log(
-//         `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
-//       );
-//       return new Response(
-//         JSON.stringify({
-//           message: "Webhook received and processed successfully.",
-//         }),
-//         {
-//           status: 200,
-//         }
-//       );
-//     } else if (metadata?.loanId) {
-//       // It's a loan transaction
-//       console.log(`Processing Loan Repayment: ${metadata.loanId}`);
-//       const loan = await payload.findByID({
-//         collection: "loans",
-//         id: metadata.loanId,
-//       });
-
-//       if (!loan) {
-//         console.log(`No existing record found for loan ID ${metadata.loanId}.`);
-//         return new Response(
-//           JSON.stringify({ message: "No existing record found" }),
-//           { status: 200 }
-//         );
-//       }
-
-//       const newAmountPaid = (loan.amountPaid || 0) + amountInNaira;
-
-//       const updateLoanPromise = payload.update({
-//         collection: "loans",
-//         id: metadata.loanId,
-//         data: isOutgoing
-//           ? {
-//               status: "active",
-//             }
-//           : {
-//               amountPaid: newAmountPaid,
-//               status: loan.amount <= newAmountPaid ? "paidOff" : "approved",
-//             },
-//       });
-
-//       const createTransactionPromise = payload.create({
-//         collection: "transactions",
-//         data: {
-//           amount: amountInNaira,
-//           category: "Loans",
-//           description: `$Loan ${isOutgoing ? "Disbursement" : "Repayment"}: ${loan.id}`,
-//           paystackRef: reference,
-//           loan: loan.id,
-//           customer: loan.customer,
-//           type: isOutgoing ? "Withdrawal" : "Deposit",
-//         },
-//       });
-
-//       const [updateLoanResult, createTransactionResult] =
-//         await Promise.allSettled([updateLoanPromise, createTransactionPromise]);
-
-//       console.log(
-//         `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`
-//       );
-//       console.log(
-//         `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`
-//       );
-//     }
-//     return new Response(
-//       JSON.stringify({
-//         message: "Webhook received and processed successfully.",
-//       }),
-//       {
-//         status: 200,
-//       }
-//     );
-//   } catch (error) {
-//     console.error(
-//       `Error updating payment record for reference ${reference}:`,
-//       error
-//     );
-//     return new Response(
-//       JSON.stringify({
-//         message: "Something went wrong. Unable to process webhook",
-//       }),
-//       { status: 401 }
-//     );
-//   }
-// };
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Paystack initialization error:", errorData);
+    throw new Error(`Paystack initialization failed: ${response.statusText}`);
+  }
+  return response.json();
+}
