@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useTransition } from "react";
 import { FormInput } from "../../../../components/form-input";
-import { ArrowUp, DollarSign } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import CustomButton from "@/components/custom-button";
 import { getPaymentLink } from "@/server-actions/payments";
 import { toast } from "sonner";
 import { Loan } from "@/payload-types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, loanAmountWithInterest } from "@/lib/utils";
 import Naira from "@/components/naira-icon";
 
 export default function MakePayment({ loan }: { loan: Loan }) {
@@ -23,13 +23,17 @@ export default function MakePayment({ loan }: { loan: Loan }) {
 
   const [isPending, startTransition] = useTransition();
 
-  const balance = (loan.amount - loan.amountPaid!) * ((100 + loan.interestRate!) / 100)
+  const balance = loanAmountWithInterest(
+    loan.amount,
+    loan.interestRate!,
+  ) - (loan.amountPaid || 0);
+  
   const isPayingFull = paymentData.amount == balance;
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value, type } = e.target;
 
@@ -68,8 +72,8 @@ export default function MakePayment({ loan }: { loan: Loan }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <CustomButton className="w-full sm:w-auto px-5 py-2 font-semibold">
-          <ArrowUp className="h-5 w-5" />
+        <CustomButton className="w-full sm:py-5 font-semibold sm:text-lg">
+          <CreditCard className="h-5 w-5" />
           <span>Make Payment</span>
         </CustomButton>
       </DialogTrigger>
@@ -83,7 +87,7 @@ export default function MakePayment({ loan }: { loan: Loan }) {
             Remaining Balance
           </p>
           <p className="text-3xl font-extrabold text-primary">
-            {formatCurrency(loan.amount - loan.amountPaid!)}
+            {formatCurrency(balance)}
           </p>
         </div>
 
@@ -108,13 +112,6 @@ export default function MakePayment({ loan }: { loan: Loan }) {
           </CustomButton>
 
           <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
-            <CustomButton
-              type="button"
-              variant="secondary"
-              className="px-6 py-2.5 font-semibold"
-            >
-              Cancel
-            </CustomButton>
             <CustomButton
               type="submit"
               disabled={isPending}

@@ -10,14 +10,24 @@ import { Building, CircleUserRound, CreditCard, Lock } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export default function Bank({ bankList }: { bankList: any }) {
+export default function Bank({
+  bankList,
+  bankCode,
+  accountNumber,
+  accountName,
+}: {
+  bankList: any;
+  accountNumber: string;
+  accountName: string;
+  bankCode: string;
+}) {
   const [settings, setSettings] = useState({
-    bank: "",
-    accountNumber: "",
-    accountName: "",
+    bank: bankCode,
+    accountNumber,
+    accountName,
     currentPassword: "",
   });
-  const [_, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (settings.accountNumber.length == 10) {
@@ -30,6 +40,8 @@ export default function Bank({ bankList }: { bankList: any }) {
           startTransition(() => {
             setSettings((prev) => ({ ...prev, accountName: response.data! }));
           });
+        } else {
+          toast.error("Couldn't verify your account.");
         }
       });
     }
@@ -89,9 +101,10 @@ export default function Bank({ bankList }: { bankList: any }) {
             value={settings.bank}
             onChange={(value) => handleSelectChange("bank", value)}
             icon={<Building className="h-5 w-5" />}
-            options={bankList.map((bank: any) => ({
+            options={bankList.map((bank: any, index: number) => ({
               label: bank.name,
               value: bank.code,
+              key: index,
             }))}
           />
           <FormInput
@@ -112,7 +125,16 @@ export default function Bank({ bankList }: { bankList: any }) {
             icon={<Lock className="h-5 w-5" />}
             placeholder="Enter password to authorize"
           />
-          <CustomButton size="sm">Update Account</CustomButton>
+          <CustomButton
+            size="sm"
+            disabled={
+              isPending ||
+              settings.accountNumber.length == 0 ||
+              settings.accountName.length == 0
+            }
+          >
+            {isPending ? "Updating..." : "Update Account Details"}
+          </CustomButton>
         </form>
       </CardContent>
     </Card>

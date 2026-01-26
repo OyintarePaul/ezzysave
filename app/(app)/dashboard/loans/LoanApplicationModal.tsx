@@ -1,3 +1,4 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,7 +69,7 @@ export default function LoanApplicationModal() {
         });
       } else {
         toast.error(
-          result.error || "Failed to submit loan application. Please try again."
+          result.error
         );
       }
     });
@@ -107,10 +108,10 @@ export default function LoanApplicationModal() {
             onChange={onDurationChange}
             className="w-full rounded-lg"
             options={[
-              { label: "6 Months", value: "6" },
-              { label: "12 Months", value: "12" },
-              { label: "24 Months", value: "24" },
-              { label: "36 Months", value: "36" },
+              { label: "6 Months", value: "6", key: 6 },
+              { label: "12 Months", value: "12", key: 12},
+              { label: "24 Months", value: "24", key: 24 },
+              { label: "36 Months", value: "36", key: 36 },
             ]}
           />
 

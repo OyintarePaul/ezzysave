@@ -34,3 +34,10 @@ export const formatDate = (date: Date): string => {
   });
   return formatter.format(date);
 };
+
+export const loanAmountWithInterest = (
+  amount: number,
+  interestRate: number,
+): number => {
+  return parseInt(((amount * (100 + interestRate)) / 100).toFixed(0));
+};

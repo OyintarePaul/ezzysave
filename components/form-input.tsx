@@ -134,8 +134,8 @@ export const FormSelect: React.FC<{
   label: string;
   value?: string;
   className?: string;
-  icon: React.ReactNode;
-  options: { label: string; value: string }[];
+  icon?: React.ReactNode;
+  options: { label: string; value: string, key: string | number }[];
   onChange?: (value: string) => void;
 }> = ({ name, label, value, onChange, options, className, icon }) => {
   return (
@@ -147,7 +147,7 @@ export const FormSelect: React.FC<{
         {label}
       </Label>
       <Select name={name} value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full rounded-lg">
+        <SelectTrigger className="w-full rounded-lg h-20">
           <div className="flex gap-2 items-center">
             {icon}
             <SelectValue placeholder="Select an option" />
@@ -157,7 +157,7 @@ export const FormSelect: React.FC<{
           <SelectGroup>
             <SelectLabel>{label}</SelectLabel>
             {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.key} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}

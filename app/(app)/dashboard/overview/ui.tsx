@@ -9,7 +9,7 @@ interface OverviewUIProps {
     totalTarget: number;
     activePlans: number;
     accruedInterest: number;
-    // loanAvailability: number;
+    approvedAmount: number;
   };
 }
 
@@ -46,7 +46,7 @@ const OverviewUI = ({ stats }: OverviewUIProps) => {
         />
         <OverviewCard
           title="Available for Loan"
-          value={0}
+          value={stats.approvedAmount}
           description="Pre-approved loan limit"
           bgColor="bg-red-500"
         />

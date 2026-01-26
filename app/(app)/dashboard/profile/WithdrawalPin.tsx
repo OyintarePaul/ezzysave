@@ -34,14 +34,16 @@ export default function WithdrawalPin() {
 
       if (!response.success) {
         toast.error(response.message);
+      } else {
+        toast.success(response.message);
+      }
+      startTransition(() => {
         setPin({
           password: "",
           newPin: "",
           confirmPin: "",
         });
-        return;
-      }
-      toast.success(response.message);
+      });
     });
   };
 

@@ -69,6 +69,7 @@ export default function Profile({
             type="email"
             value={profile.email}
             onChange={handleChange}
+            readOnly
             icon={<Mail className="h-5 w-5" />}
           />
           <FormInput

@@ -97,11 +97,6 @@ export const handleChargeSuccess = async ({
   const amountInNaira = amount / 100;
   const payload = await getPayloadClient();
   try {
-    // Update your database or perform necessary actions here
-    console.log(
-      `Payment verified for reference ${reference}. Updating records...`,
-    );
-
     if (metadata?.planId) {
       // It's a plan transaction
       const plan = await payload.findByID({
@@ -140,6 +135,7 @@ export const handleChargeSuccess = async ({
           plan: plan.id,
           customer: plan.customer,
           type: "Deposit",
+          status: "completed",
         },
       });
 
@@ -193,11 +189,12 @@ export const handleChargeSuccess = async ({
         data: {
           amount: amountInNaira,
           category: "Loans",
-          description: `$Loan Repayment: ${loan.id}`,
+          description: `Loan Repayment: ${loan.id}`,
           paystackRef: reference,
           loan: loan.id,
           customer: loan.customer,
           type: "Deposit",
+          status: "completed",
         },
       });
 
@@ -235,24 +232,49 @@ export const handleChargeSuccess = async ({
 
 export const handleTransferSuccess = async ({
   amount,
-  metadata,
   reference,
 }: {
   amount: number;
-  metadata: {
-    planId?: string;
-    loanId?: number;
-  };
   reference: string;
 }) => {
   const amountInNaira = amount / 100;
   const payload = await getPayloadClient();
-  try {
-    // Update your database or perform necessary actions here
-    console.log(
-      `Payment verified for reference ${reference}. Updating records...`,
-    );
 
+  // get metadata from transaction with matching paystackRef
+  const transactions = await payload.find({
+    collection: "transactions",
+    select: {
+      plan: true,
+      loan: true,
+    },
+
+    depth: 0,
+
+    where: {
+      paystackRef: {
+        equals: reference,
+      },
+    },
+  });
+
+  if (transactions.totalDocs === 0) {
+    console.log(`No transaction found with reference ${reference}.`);
+    return new Response(JSON.stringify({ message: "No transaction found" }), {
+      status: 200,
+    });
+  }
+
+  const transaction = transactions.docs[0];
+  console.log(transaction);
+
+  const metadata = {
+    planId: transaction.plan as string,
+    loanId: transaction.loan as string,
+  };
+
+  console.log("Metadata:", metadata);
+
+  try {
     if (metadata?.planId) {
       // It's a plan withdrawal transaction
       const plan = await payload.findByID({
@@ -291,6 +313,7 @@ export const handleTransferSuccess = async ({
           plan: plan.id,
           customer: plan.customer,
           type: "Withdrawal",
+          status: "completed",
         },
       });
 
@@ -314,7 +337,7 @@ export const handleTransferSuccess = async ({
       );
     } else if (metadata?.loanId) {
       // It's a loan transaction
-      console.log(`Processing Loan Repayment: ${metadata.loanId}`);
+      console.log(`Processing Loan Disbursement: ${metadata.loanId}`);
       const loan = await payload.findByID({
         collection: "loans",
         id: metadata.loanId,
@@ -328,27 +351,19 @@ export const handleTransferSuccess = async ({
         );
       }
 
-      const newAmountPaid = (loan.amountPaid || 0) + amountInNaira;
-
       const updateLoanPromise = payload.update({
         collection: "loans",
         id: metadata.loanId,
         data: {
-          amountPaid: newAmountPaid,
-          status: loan.amount <= newAmountPaid ? "paidOff" : "approved",
+          status: "active",
         },
       });
 
-      const createTransactionPromise = payload.create({
+      const createTransactionPromise = payload.update({
         collection: "transactions",
+        id: transaction.id,
         data: {
-          amount: amountInNaira,
-          category: "Loans",
-          description: `$Loan Disbursement: ${loan.id}`,
-          paystackRef: reference,
-          loan: loan.id,
-          customer: loan.customer,
-          type: "Withdrawal",
+          status: "completed",
         },
       });
 
@@ -385,12 +400,15 @@ export const handleTransferSuccess = async ({
 };
 
 export async function listBanks() {
-  const response = await fetch("https://api.paystack.co/bank?currency=NGN", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+  const response = await fetch(
+    "https://api.paystack.co/bank?currency=NGN&pay_with_bank=true",
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -446,3 +464,69 @@ export async function createRecipientCode(
   }
   return response.json();
 }
+
+export async function initiateTransfer({
+  recipientCode,
+  amount,
+  reason,
+  reference,
+}: {
+  recipientCode: string;
+  amount: number;
+  reason: string;
+  reference: string;
+}) {
+  const response = await fetch("https://api.paystack.co/transfer", {
+    method: "POST",
+    body: JSON.stringify({
+      source: "balance",
+      amount: amount * 100, //amount in kobo
+      recipient: recipientCode,
+      reference,
+      reason,
+    }),
+    headers: {
+      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Paystack initialization error:", errorData);
+    throw new Error(`Paystack initialization failed: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function verifyTransfer({ reference }: { reference: string }) {
+  const response = await fetch(
+    "https://api.paystack.co/transfer/verify/" + reference,
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Paystack initialization error:", errorData);
+    throw new Error(`Paystack initialization failed: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// <div className="min-h-screen w-full bg-white relative">
+//   {/* Teal Glow Background */}
+//   <div
+//     className="absolute inset-0 z-0"
+//     style={{
+//       backgroundImage: `
+//         radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #14b8a6 100%)
+//       `,
+//       backgroundSize: "100% 100%",
+//     }}
+//   />
+//   {/* Your Content/Components */}
+// </div>

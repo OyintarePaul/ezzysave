@@ -30,6 +30,13 @@ export const Transactions: CollectionConfig = {
       type: "number",
       required: true,
     },
+{
+      name: "status",
+      type: "select",
+      options: ["pending", "completed", "failed"],
+      required: true,
+    },
+
     {
       name: "plan",
       type: "relationship",
@@ -51,6 +58,7 @@ export const Transactions: CollectionConfig = {
       name: "paystackRef",
       type: "text",
       unique: true,
+      index: true,
     },
   ],
 };

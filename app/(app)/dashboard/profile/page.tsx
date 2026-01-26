@@ -7,12 +7,17 @@ import { listBanks } from "@/lib/paystack";
 import UserAvatar from "./Avatar";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { getPayloadCustomerByClerkId } from "@/lib/payload";
 
 const ProfilePage: React.FC = async () => {
   await pageAuthGuard("/profile");
   const user = await currentUser();
   if (!user) return null;
-  const bankList = await listBanks();
+
+  const [bankList, customer] = await Promise.all([
+    listBanks(),
+    getPayloadCustomerByClerkId(user.id),
+  ]);
 
   const userInfo = {
     firstName: user.firstName || "",
@@ -30,8 +35,13 @@ const ProfilePage: React.FC = async () => {
       <div className="space-y-10">
         <UserAvatar {...userInfo} />
         <Profile {...userInfo} />
+        <Bank
+          bankList={bankList.data}
+          accountNumber={customer?.accountNumber || ""}
+          bankCode={customer?.bankCode || ""}
+          accountName={customer?.accountName || ""}
+        />
         <WithdrawalPin />
-        <Bank bankList={bankList.data} />
         <SignOut />
       </div>
     </div>

@@ -1,74 +1,110 @@
-import { NextRequest } from "next/server";
 import crypto from "crypto";
+import { NextRequest } from "next/server";
 import {
   handleChargeSuccess,
   handleTransferSuccess,
   verifyPaystackTransaction,
+  verifyTransfer,
 } from "@/lib/paystack";
 
 export const POST = async (req: NextRequest) => {
-  console.log("Received Paystack webhook");
-  const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-  if (!PAYSTACK_SECRET_KEY) {
-    console.log("Paystack secret key not configured");
-    return new Response(
-      JSON.stringify({ message: "Paystack secret key not configured" }),
-      { status: 500 }
-    );
-  }
-
-  // Verify webhook source
-  const signature = req.headers.get("x-paystack-signature") || "";
-  const body = await req.json();
-  console.log("Paystack Webhook Body:", body);
-
-  const hash = crypto
-    .createHmac("sha512", PAYSTACK_SECRET_KEY)
-    .update(JSON.stringify(body))
-    .digest("hex");
-
-  if (hash !== signature) {
-    return new Response(JSON.stringify({ message: "Invalid signature" }), {
-      status: 400,
-    });
-  }
-
-  // We are good to go
-  const { reference, metadata, amount } = body.data;
-
-  // Handle the event (e.g., payment successful)
-  if (body.event === "charge.success") {
-    // Verify transaction
-    const verifyResponse = await verifyPaystackTransaction(reference);
-    if (!verifyResponse.status) {
-      console.log(`Failed to verify transaction with reference ${reference}.`);
-      console.log("Verification response:", verifyResponse);
+  try {
+    console.log("Received Paystack webhook at ", new Date().toISOString());
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+    if (!PAYSTACK_SECRET_KEY) {
+      console.log("Paystack secret key not configured");
       return new Response(
-        JSON.stringify({ message: "Transaction verification failed" }),
-        { status: 200 }
+        JSON.stringify({ message: "Paystack secret key not configured" }),
+        { status: 500 },
       );
     }
 
-    if (verifyResponse.data.status !== "success") {
-      console.log(`Payment with reference ${reference} not successful.`);
+    // Verify webhook source
+    const signature = req.headers.get("x-paystack-signature") || "";
+    const body = await req.json();
+    console.log("Paystack Webhook Body:", body);
+
+    const hash = crypto
+      .createHmac("sha512", PAYSTACK_SECRET_KEY)
+      .update(JSON.stringify(body))
+      .digest("hex");
+
+    if (hash !== signature) {
+      return new Response(JSON.stringify({ message: "Invalid signature" }), {
+        status: 400,
+      });
+    }
+
+    const { reference, metadata, amount } = body.data;
+    // Verify transaction
+    console.log(`Processing event for reference: ${reference}`);
+
+    // Handle the event (e.g., payment successful)
+    if (body.event === "charge.success") {
+      const verifyResponse = await verifyPaystackTransaction(reference);
+      if (!verifyResponse.status) {
+        console.log(
+          `Failed to verify transaction with reference ${reference}.`,
+        );
+        console.log("Verification response:", verifyResponse);
+        return new Response(
+          JSON.stringify({ message: "Transaction verification failed" }),
+          { status: 400 },
+        );
+      }
+
+      if (verifyResponse.data.status !== "success") {
+        console.log(`Payment with reference ${reference} not successful.`);
+        return new Response(
+          JSON.stringify({ message: "Payment not successful" }),
+          {
+            status: 200,
+          },
+        );
+      }
+      console.log(
+        `Payment verified for reference ${reference}. Updating records...`,
+      );
+      return handleChargeSuccess({ metadata, amount, reference });
+    } else if (body.event === "transfer.success") {
+      // const verifyResponse = await verifyTransfer(reference);
+      // if (!verifyResponse.status) {
+      //   console.log(`Failed to verify transfer with reference ${reference}.`);
+      //   console.log("Verification response:", verifyResponse);
+      //   return new Response(
+      //     JSON.stringify({ message: "Transfer verification failed" }),
+      //     { status: 400 },
+      //   );
+      // }
+
+      // if (verifyResponse.data.status !== "success") {
+      //   console.log(`Transfer with reference ${reference} not successful.`);
+      //   return new Response(
+      //     JSON.stringify({ message: "Transfer not successful" }),
+      //     {
+      //       status: 200,
+      //     },
+      //   );
+      // }
+      // console.log(
+      //   `Transfer verified for reference ${reference}. Updating records...`,
+      // );
+      return handleTransferSuccess({ amount, reference });
+    } else {
       return new Response(
-        JSON.stringify({ message: "Payment not successful" }),
+        JSON.stringify({
+          message: "Webhook received and processed, but no changes were made",
+        }),
         {
           status: 200,
-        }
+        },
       );
     }
-    return handleChargeSuccess({ metadata, amount, reference });
-  } else if (body.event === "transfer.success") {
-    return handleTransferSuccess({ metadata, amount, reference });
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    return new Response(
+      JSON.stringify({ message: "Error processing webhook" }),
+      { status: 500 },
+    );
   }
-
-  return new Response(
-    JSON.stringify({
-      message: "Webhook received and processed, but no changes were made",
-    }),
-    {
-      status: 200,
-    }
-  );
 };

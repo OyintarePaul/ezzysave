@@ -118,6 +118,7 @@ export async function updateBankDetails(
       };
 
     // reverify bank details and get account name
+    // change bankCode from 001 to bankCode
     const resolveResponse = await resolveAccount(accountNumber, bankCode);
     if (!resolveResponse.status) {
       return {

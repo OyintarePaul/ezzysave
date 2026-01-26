@@ -215,6 +215,7 @@ export interface Transaction {
   category?: ('Savings' | 'Loans' | 'Interests') | null;
   type: 'Withdrawal' | 'Deposit' | 'Interest';
   amount: number;
+  status: 'pending' | 'completed' | 'failed';
   plan?: (string | null) | SavingsPlan;
   loan?: (string | null) | Loan;
   customer?: (string | null) | Customer;
@@ -417,6 +418,7 @@ export interface TransactionsSelect<T extends boolean = true> {
   category?: T;
   type?: T;
   amount?: T;
+  status?: T;
   plan?: T;
   loan?: T;
   customer?: T;

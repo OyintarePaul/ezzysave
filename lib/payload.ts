@@ -1,6 +1,7 @@
 import "server-only";
 import { getPayload, Where } from "payload";
 import config from "@/payload.config";
+import ApprovedLoan from "@/app/(app)/dashboard/loans/ApprovedLoan";
 
 export async function getPayloadClient() {
   return getPayload({ config });
@@ -97,7 +98,7 @@ export async function getPayloadCustomerByClerkId(clerkId: string) {
 
 export async function getStats(customerId: string) {
   const payload = await getPayloadClient();
-  let totalSaved, totalTarget, activePlans, accruedInterest;
+  let totalSaved, totalTarget, activePlans, accruedInterest, approvedAmount;
 
   const plans = await payload.find({
     collection: "savings-plans",
@@ -105,6 +106,16 @@ export async function getStats(customerId: string) {
       customer: { equals: customerId },
     },
   });
+
+  const loan = await payload.find({
+    collection: "loans",
+    where: {
+      customer: { equals: customerId },
+      status: { equals: "approved" },
+    },
+  });
+
+  approvedAmount = loan.docs[0]?.amount || 0;
 
   totalSaved = plans.docs.reduce(
     (acc, plan) => acc + (plan.currentBalance || 0),
@@ -128,6 +139,7 @@ export async function getStats(customerId: string) {
     totalTarget,
     activePlans,
     accruedInterest,
+    approvedAmount
   };
 }
 
