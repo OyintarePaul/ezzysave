@@ -41,3 +41,5 @@ export const loanAmountWithInterest = (
 ): number => {
   return parseInt(((amount * (100 + interestRate)) / 100).toFixed(0));
 };
+
+

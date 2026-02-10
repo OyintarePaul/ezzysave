@@ -1,5 +1,6 @@
 "use client";
 import CustomButton from "@/components/custom-button";
+import { formatCurrency } from "@/lib/utils";
 import { SavingsPlan } from "@/payload-types";
 import { Calendar, CheckCircle2, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -143,10 +144,10 @@ export default function DailyContributionTracker({
           </div>
           <div className="text-center">
             <p className="text-[8px] sm:text-[10px] font-bold opacity-80 uppercase tracking-widest">
-              Efficiency
+              Daily Amount
             </p>
             <p className="text-sm sm:text-lg font-black">
-              {((totalDaysCovered / (30 * 6)) * 100).toFixed(0)}%
+              {formatCurrency(plan.dailyAmount!)}
             </p>
           </div>
         </div>

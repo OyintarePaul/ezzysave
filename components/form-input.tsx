@@ -15,30 +15,16 @@ import {
 } from "@/components/ui/select";
 
 export interface FormInputProps extends ComponentProps<typeof Input> {
-  id: string;
   label: string;
-  type?: string;
-  value?: string | number;
-  onChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => void;
   icon?: React.ReactNode;
-  placeholder?: string;
-  as?: "textarea";
   error?: string | null;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
   id,
   label,
-  type = "text",
-  value,
-  onChange,
   icon,
-  placeholder,
   error,
-  as,
-  readOnly,
   ...props
 }) => {
   const commonClasses = "w-full rounded-lg";
@@ -57,31 +43,13 @@ export const FormInput: React.FC<FormInputProps> = ({
             {icon}
           </span>
         )}
-        {as === "textarea" ? (
-          <Textarea
-            readOnly={readOnly}
-            id={id}
-            name={id}
-            value={value as string}
-            onChange={onChange}
-            placeholder={placeholder}
-            className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} min-h-32`}
-          />
-        ) : (
-          <Input
-            {...props}
-            id={id}
-            name={id}
-            type={type}
-            value={value}
-            readOnly={readOnly}
-            onChange={onChange}
-            placeholder={placeholder}
-            className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} ${
-              error ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-        )}
+        <Input
+          {...props}
+          id={id}
+          className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+        />
       </div>
 
       {error && (
@@ -129,24 +97,37 @@ export const FormCheckbox: React.FC<FormCheckboxProps> = ({
   </div>
 );
 
-export const FormSelect: React.FC<{
-  name: string;
+interface FormSelectProps
+  extends Omit<ComponentProps<typeof Select>, "onValueChange"> {
+  error?: string | null;
   label: string;
-  value?: string;
-  className?: string;
   icon?: React.ReactNode;
-  options: { label: string; value: string, key: string | number }[];
-  onChange?: (value: string) => void;
-}> = ({ name, label, value, onChange, options, className, icon }) => {
+  // react hook form onChange handler signature: (name: string, value: string) => void
+  onChange: (value: string) => void;
+  options: { label: string; value: string; key: string | number }[];
+}
+
+export const FormSelect: React.FC<FormSelectProps> = ({
+  label,
+  options,
+  error,
+  icon,
+  onChange,
+  ...props
+}) => {
   return (
     <div className="space-y-2">
       <Label
-        htmlFor={name}
+        htmlFor={props.name}
         className="text-sm font-medium text-gray-700 dark:text-gray-300"
       >
         {label}
       </Label>
-      <Select name={name} value={value} onValueChange={onChange}>
+      <Select
+        name={props.name}
+        value={props.value}
+        onValueChange={(value) => onChange(value)}
+      >
         <SelectTrigger className="w-full rounded-lg h-20">
           <div className="flex gap-2 items-center">
             {icon}
@@ -164,6 +145,12 @@ export const FormSelect: React.FC<{
           </SelectGroup>
         </SelectContent>
       </Select>
+      {error && (
+        <p className="mt-1 flex items-center text-xs text-red-500">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {error}
+        </p>
+      )}
     </div>
   );
 };

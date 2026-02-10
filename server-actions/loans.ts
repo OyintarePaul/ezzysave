@@ -1,10 +1,10 @@
 "use server";
 import { v4 as uuid } from "uuid";
-import { getCurrentUser } from "@/lib/auth";
-import { getPayloadClient, getPayloadCustomerByClerkId } from "@/lib/payload";
+
+import { getPayloadClient } from "@/lib/payload";
 import { initiateTransfer } from "@/lib/paystack";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
 
 interface submitLoadApplicationParams {
   amount: number;
@@ -20,11 +20,7 @@ interface submitLoanApplicationResponse {
 export async function submitLoanApplication(
   loanData: submitLoadApplicationParams,
 ): Promise<submitLoanApplicationResponse> {
-  const user = await getCurrentUser();
-  const customer = await getPayloadCustomerByClerkId(user.id);
-  if (!customer) {
-    return { success: false, error: "Failed to submit loan application." };
-  }
+  const customer = await getCurrentPayloadCustomer();
 
   try {
     console.log(
@@ -52,8 +48,6 @@ export async function submitLoanApplication(
 }
 
 export async function rejectLoan(loanId: string) {
-  const user = await getCurrentUser();
-
   try {
     const payload = await getPayloadClient();
 
@@ -96,13 +90,9 @@ export async function rejectLoan(loanId: string) {
 }
 
 export async function acceptAndDisburseLoan(loanId: string) {
+  // verify by withdrawal pin
   try {
-    const user = await getCurrentUser();
-    const customer = await getPayloadCustomerByClerkId(user.id);
-    if (!customer) {
-      return { success: false, error: "Customer not found." };
-    }
-
+    const customer = await getCurrentPayloadCustomer();
     const payload = await getPayloadClient();
 
     // get loan details

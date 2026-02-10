@@ -1,12 +1,23 @@
 import { NavItem } from "@/types";
-import { House, CreditCard, DollarSign, User, PiggyBank } from "lucide-react";
+import {
+  House,
+  CreditCard,
+  DollarSign,
+  PiggyBank,
+  Settings,
+} from "lucide-react";
 
 export const navItems: NavItem[] = [
   { id: 1, name: "Overview", icon: House, path: "/dashboard/overview" },
   { id: 2, name: "Savings Plans", icon: PiggyBank, path: "/dashboard/savings" },
-  { id: 3, name: "Transactions", icon: DollarSign, path: "/dashboard/transactions" },
+  {
+    id: 3,
+    name: "Transactions",
+    icon: DollarSign,
+    path: "/dashboard/transactions",
+  },
   { id: 4, name: "Loans", icon: CreditCard, path: "/dashboard/loans" },
-  { id: 5, name: "Profile", icon: User, path: "/dashboard/profile" },
+  { id: 5, name: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];
 
 export const typeColors: {

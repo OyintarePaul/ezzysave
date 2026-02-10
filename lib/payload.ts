@@ -1,7 +1,6 @@
 import "server-only";
-import { getPayload, Where } from "payload";
+import { getPayload } from "payload";
 import config from "@/payload.config";
-import ApprovedLoan from "@/app/(app)/dashboard/loans/ApprovedLoan";
 
 export async function getPayloadClient() {
   return getPayload({ config });
@@ -14,7 +13,7 @@ export async function createPayloadCustomer(
     lastName: string;
     email: string;
     phone?: string;
-  }
+  },
 ) {
   // Placeholder function for creating a Payload customer
   const payload = await getPayloadClient();
@@ -34,7 +33,7 @@ export async function createPayloadCustomer(
 
 export async function deletePayloadCustomer(clerkId: string) {
   // Placeholder function for deleting a Payload customer
-  const payload = await getPayload({ config });
+  const payload = await getPayloadClient();
   await payload.delete({
     collection: "customers",
     where: {
@@ -50,10 +49,10 @@ export async function updatePayloadCustomer(
     lastName?: string;
     email?: string;
     phone?: string;
-  }
+  },
 ) {
   // Placeholder function for updating a Payload customer
-  const payload = await getPayload({ config });
+  const payload = await getPayloadClient();
   const customers = await payload.find({
     collection: "customers",
     where: {
@@ -81,120 +80,8 @@ export async function updatePayloadCustomer(
   return updatedUser;
 }
 
-export async function getPayloadCustomerByClerkId(clerkId: string) {
-  const payload = await getPayloadClient();
-  const customers = await payload.find({
-    collection: "customers",
-    where: {
-      clerkId: { equals: clerkId },
-    },
-  });
 
-  if (customers.totalDocs === 0) {
-    return null;
-  }
-  return customers.docs[0];
-}
 
-export async function getStats(customerId: string) {
-  const payload = await getPayloadClient();
-  let totalSaved, totalTarget, activePlans, accruedInterest, approvedAmount;
 
-  const plans = await payload.find({
-    collection: "savings-plans",
-    where: {
-      customer: { equals: customerId },
-    },
-  });
 
-  const loan = await payload.find({
-    collection: "loans",
-    where: {
-      customer: { equals: customerId },
-      status: { equals: "approved" },
-    },
-  });
 
-  approvedAmount = loan.docs[0]?.amount || 0;
-
-  totalSaved = plans.docs.reduce(
-    (acc, plan) => acc + (plan.currentBalance || 0),
-    0
-  );
-
-  totalTarget = plans.docs.reduce(
-    (acc, plan) => acc + (plan.targetAmount || 0),
-    0
-  );
-
-  activePlans = plans.docs.filter((p) => p.status === "Active").length;
-
-  accruedInterest = plans.docs.reduce(
-    (acc, plan) => acc + (plan.interestEarned || 0),
-    0
-  );
-
-  return {
-    totalSaved,
-    totalTarget,
-    activePlans,
-    accruedInterest,
-    approvedAmount
-  };
-}
-
-export const getLoansForCustomer = async (customerId: string) => {
-  const payload = await getPayloadClient();
-  const response = await payload.find({
-    collection: "loans",
-    where: {
-      customer: {
-        equals: customerId,
-      },
-    },
-    sort: "-updatedAt",
-  });
-
-  if (response.totalDocs > 0) {
-    return response.docs;
-  } else {
-    return [];
-  }
-};
-
-export const getTransactions = async (
-  customerId: string,
-  planId?: string,
-  limit?: number
-) => {
-  const payload = await getPayloadClient();
-
-  let query: Where;
-  if (planId) {
-    console.log(planId);
-    query = {
-      plan: {
-        equals: planId,
-      },
-    };
-  } else {
-    query = {
-      customer: {
-        equals: customerId,
-      },
-    };
-  }
-
-  const response = await payload.find({
-    collection: "transactions",
-    where: query,
-    limit,
-    sort: "-createdAt",
-  });
-
-  if (response.totalDocs > 0) {
-    return response.docs;
-  } else {
-    return [];
-  }
-};

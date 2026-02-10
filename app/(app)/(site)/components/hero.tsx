@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+
 const Hero = () => (
   <section className="bg-gray-50 py-20 md:py-32">
     <div className="container mx-auto text-center px-4">

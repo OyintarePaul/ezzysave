@@ -1,57 +1,18 @@
-import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Loan } from "@/payload-types";
-import { Banknote, CheckCircle, Clock, HandCoins } from "lucide-react";
+import { Banknote, CheckCircle, CircleCheck, Clock } from "lucide-react";
 import MakePayment from "./make-payment";
 
-export default async function LoansList({ loans }: { loans: Loan[] }) {
-  const activeLoans = loans.filter(
-    (l) => l.status === "active" || l.status === "deferred"
-  );
+export default async function PaidLoans({ loans }: { loans: Loan[] }) {
   const paidLoans = loans.filter((l) => l.status === "paidOff");
 
   return (
     <div>
-      {/* Current Loans Status (1/3 width on desktop) */}
-      {/* <section className="lg:col-span-1 mt-8">
-        <Card className="p-6 h-full">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-            <HandCoins className="h-5 w-5 mr-2 text-red-500" />
-            My Active Obligations ({activeLoans.length})
-          </h2>
-
-          <div className="space-y-4">
-            {activeLoans.length > 0 ? (
-              activeLoans.map((loan) => (
-                <LoanHistoryItem key={loan.id} loan={loan} />
-              ))
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400">
-                No active loans found. Time to take one out!
-              </p>
-            )}
-          </div>
-        </Card>
-      </section> */}
-
       {paidLoans.length > 0 && (
         <section className="pt-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2 text-green-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <CircleCheck className="size-5 mr-2 text-green-600" />
               Paid Off History ({paidLoans.length})
             </h2>
           </div>
@@ -106,9 +67,9 @@ export default async function LoansList({ loans }: { loans: Loan[] }) {
 }
 
 const LoanHistoryItem: React.FC<{ loan: Loan }> = ({ loan }) => {
-  const amountWithInterest = loan.amount * ((100 + loan.interestRate!) / 100)
+  const amountWithInterest = loan.amount * ((100 + loan.interestRate!) / 100);
   const progress = (loan.amountPaid! / amountWithInterest) * 100;
-  const balance = (amountWithInterest - loan.amountPaid!)
+  const balance = amountWithInterest - loan.amountPaid!;
 
   let statusClass = "";
   let barColor = "";

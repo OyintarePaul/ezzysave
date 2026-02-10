@@ -5,22 +5,23 @@ const isDashboardRoute = createRouteMatcher("/dashboard(.*)");
 const isAuthRoute = createRouteMatcher("/auth(.*)");
 
 export default clerkMiddleware(async (auth, req) => {
+  const { isAuthenticated } = await auth();
   if (isDashboardRoute(req)) {
-    if (!(await auth()).isAuthenticated) {
+    if (!isAuthenticated) {
       const redirectUrl = req.nextUrl.clone();
       redirectUrl.pathname = "/auth/login";
       redirectUrl.searchParams.set(
         "returnTo",
-        req.nextUrl.pathname + req.nextUrl.search
+        req.nextUrl.pathname + req.nextUrl.search,
       );
       return NextResponse.redirect(new URL(redirectUrl, req.nextUrl.origin));
     }
   }
 
   if (isAuthRoute(req)) {
-    if ((await auth()).isAuthenticated) {
+    if (isAuthenticated) {
       return NextResponse.redirect(
-        new URL("/dashboard/overview", req.nextUrl.origin)
+        new URL("/dashboard/overview", req.nextUrl.origin),
       );
     }
   }

@@ -24,6 +24,12 @@ export default function ActiveLoan({ loan }: { loan: Loan }) {
   const maturityDate = addMonths(startDate, loan.duration);
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+          <TrendingUp className="w-5 h-5 text-primary mr-2" />
+          Active Loan
+        </h2>
+      </div>
       {/* Primary Payment Card */}
       <Card className="flex flex-col justify-between">
         <CardContent>

@@ -6,7 +6,7 @@ import Hero from "./components/hero";
 import Testimonials from "./components/testimonials";
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-foreground font-sans">
       <Header />
       <main>
         <Hero />

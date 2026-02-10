@@ -180,7 +180,7 @@ export const handleChargeSuccess = async ({
         id: metadata.loanId,
         data: {
           amountPaid: newAmountPaid,
-          status: loan.amount <= newAmountPaid ? "paidOff" : "approved",
+          status: loan.amount <= newAmountPaid ? "paidOff" : "active",
         },
       });
 
@@ -272,8 +272,6 @@ export const handleTransferSuccess = async ({
     loanId: transaction.loan as string,
   };
 
-  console.log("Metadata:", metadata);
-
   try {
     if (metadata?.planId) {
       // It's a plan withdrawal transaction
@@ -303,29 +301,23 @@ export const handleTransferSuccess = async ({
       });
 
       // create a new transaction
-      const createTransactionPromise = payload.create({
+      const updateTransactionPromise = payload.update({
         collection: "transactions",
+        id: transaction.id,
         data: {
-          amount: amountInNaira,
-          category: "Savings",
-          description: `${plan.planType} Savings Withdrawal: ${plan.planName}`,
-          paystackRef: reference,
-          plan: plan.id,
-          customer: plan.customer,
-          type: "Withdrawal",
           status: "completed",
         },
       });
 
       //run both savings and transaction at the same time
-      const [updatePlanResult, createTransactionResult] =
-        await Promise.allSettled([updatePlanPromise, createTransactionPromise]);
+      const [updatePlanResult, updateTransactionResult] =
+        await Promise.allSettled([updatePlanPromise, updateTransactionPromise]);
 
       console.log(
         `Payment record for reference ${reference}. Status: ${updatePlanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
+        `Transaction record for reference ${reference}. Status: ${updateTransactionResult.status}`,
       );
       return new Response(
         JSON.stringify({
@@ -359,7 +351,7 @@ export const handleTransferSuccess = async ({
         },
       });
 
-      const createTransactionPromise = payload.update({
+      const updateTransactionPromise = payload.update({
         collection: "transactions",
         id: transaction.id,
         data: {
@@ -367,14 +359,14 @@ export const handleTransferSuccess = async ({
         },
       });
 
-      const [updateLoanResult, createTransactionResult] =
-        await Promise.allSettled([updateLoanPromise, createTransactionPromise]);
+      const [updateLoanResult, updateTransactionResult] =
+        await Promise.allSettled([updateLoanPromise, updateTransactionPromise]);
 
       console.log(
         `Loan ${metadata.loanId} updated. Status: ${updateLoanResult.status}`,
       );
       console.log(
-        `Transaction record for reference ${reference}. Status: ${createTransactionResult.status}`,
+        `Transaction record for reference ${reference}. Status: ${updateTransactionResult.status}`,
       );
     }
     return new Response(

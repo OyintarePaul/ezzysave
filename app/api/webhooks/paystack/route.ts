@@ -4,7 +4,6 @@ import {
   handleChargeSuccess,
   handleTransferSuccess,
   verifyPaystackTransaction,
-  verifyTransfer,
 } from "@/lib/paystack";
 
 export const POST = async (req: NextRequest) => {
@@ -36,59 +35,11 @@ export const POST = async (req: NextRequest) => {
     }
 
     const { reference, metadata, amount } = body.data;
-    // Verify transaction
-    console.log(`Processing event for reference: ${reference}`);
 
     // Handle the event (e.g., payment successful)
     if (body.event === "charge.success") {
-      const verifyResponse = await verifyPaystackTransaction(reference);
-      if (!verifyResponse.status) {
-        console.log(
-          `Failed to verify transaction with reference ${reference}.`,
-        );
-        console.log("Verification response:", verifyResponse);
-        return new Response(
-          JSON.stringify({ message: "Transaction verification failed" }),
-          { status: 400 },
-        );
-      }
-
-      if (verifyResponse.data.status !== "success") {
-        console.log(`Payment with reference ${reference} not successful.`);
-        return new Response(
-          JSON.stringify({ message: "Payment not successful" }),
-          {
-            status: 200,
-          },
-        );
-      }
-      console.log(
-        `Payment verified for reference ${reference}. Updating records...`,
-      );
       return handleChargeSuccess({ metadata, amount, reference });
     } else if (body.event === "transfer.success") {
-      // const verifyResponse = await verifyTransfer(reference);
-      // if (!verifyResponse.status) {
-      //   console.log(`Failed to verify transfer with reference ${reference}.`);
-      //   console.log("Verification response:", verifyResponse);
-      //   return new Response(
-      //     JSON.stringify({ message: "Transfer verification failed" }),
-      //     { status: 400 },
-      //   );
-      // }
-
-      // if (verifyResponse.data.status !== "success") {
-      //   console.log(`Transfer with reference ${reference} not successful.`);
-      //   return new Response(
-      //     JSON.stringify({ message: "Transfer not successful" }),
-      //     {
-      //       status: 200,
-      //     },
-      //   );
-      // }
-      // console.log(
-      //   `Transfer verified for reference ${reference}. Updating records...`,
-      // );
       return handleTransferSuccess({ amount, reference });
     } else {
       return new Response(

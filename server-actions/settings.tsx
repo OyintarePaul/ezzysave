@@ -1,8 +1,9 @@
 "use server";
-import { getCurrentUser, verifyPassword } from "@/lib/auth";
+import { getCurrentClerkUserId, verifyPassword } from "@/lib/auth";
 import { getPayloadClient } from "@/lib/payload";
 import { createRecipientCode, resolveAccount } from "@/lib/paystack";
 import bcrypt from "bcrypt";
+import { revalidatePath } from "next/cache";
 
 interface ActionResponse<T> {
   success: boolean;
@@ -21,7 +22,7 @@ export async function updatePinAction({
 }): Promise<ActionResponse<null>> {
   try {
     // authenticate user and get user id
-    const { id } = await getCurrentUser();
+    const id = await getCurrentClerkUserId();
 
     // verify password
     const verified = await verifyPassword(id, password);
@@ -62,7 +63,7 @@ export async function updatePinAction({
       },
     });
 
-    // return
+    revalidatePath("/dashboard/settings/security");
     return {
       success: true,
       message: "Pin updated successfully.",
@@ -107,7 +108,7 @@ export async function updateBankDetails(
 ): Promise<ActionResponse<null>> {
   try {
     // authenticate user and get user id
-    const { id } = await getCurrentUser();
+    const id = await getCurrentClerkUserId();
 
     // verify password
     const verified = await verifyPassword(id, password);

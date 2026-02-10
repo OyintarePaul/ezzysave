@@ -1,26 +1,19 @@
-import { getCurrentUser, pageAuthGuard } from "@/lib/auth";
-import LoansList from "./LoansList";
+import LoansList from "./PaidLoans";
 import { Suspense } from "react";
-import {
-  getLoansForCustomer,
-  getPayloadCustomerByClerkId,
-} from "@/lib/payload";
 import ActiveLoan from "./ActiveLoan";
 import PendingLoan from "./PendingLoan";
 import LoanApplicationSection from "./LoanApplication";
 import ApprovedLoan from "./ApprovedLoan";
+import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
+import { getLoans } from "@/data/loan/getLoans";
+import PaidLoans from "./PaidLoans";
 
 const LoansPage = async () => {
-  await pageAuthGuard("/loans");
-  const user = await getCurrentUser();
-  const customer = await getPayloadCustomerByClerkId(user.id);
-  if (!customer) {
-    throw new Error("Customer not found");
-  }
-  const loans = await getLoansForCustomer(customer.id);
+  const loans = await getLoans();
   const pendingLoans = loans.filter((l) => l.status === "pending");
   const activeLoans = loans.filter((l) => l.status == "active");
   const approvedLoans = loans.filter((l) => l.status == "approved");
+  const paidLoans = loans.filter((l) => l.status === "paidOff");
 
   return (
     <div className="p-4 lg:p-8 space-y-8 pb-16 lg:pb-8">
@@ -44,9 +37,7 @@ const LoansPage = async () => {
 
         {approvedLoans.length > 0 && <ApprovedLoan loan={approvedLoans[0]} />}
 
-        <Suspense fallback={<div>Loading...</div>}>
-          <LoansList loans={loans} />
-        </Suspense>
+        <PaidLoans loans={paidLoans} />
       </main>
     </div>
   );

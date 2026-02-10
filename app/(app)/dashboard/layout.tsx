@@ -5,7 +5,7 @@ import BottomNavigation from "./components/bottom-nav";
 import Sidebar from "./components/sidebar";
 
 export const metadata: Metadata = {
-  title: { template: "%s | EzzySave", absolute: "EzzySave" },
+  title: { template: "%s - EzzySave", absolute: "EzzySave" },
 };
 
 export default async function DashboardLayout({
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
 }) {
   return (
     <>
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="flex h-screen bg-white">
         {/* Sidebar (Large screens) - Consumes router state via hook */}
         <Sidebar />
 

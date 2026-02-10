@@ -1,76 +1,43 @@
-import { Button } from "@/components/ui/button";
-import { getCurrentUser, pageAuthGuard } from "@/lib/auth";
-import {
-  ArrowDown,
-  Calendar,
-  ChevronLeft,
-  Lock,
-  Rocket,
-  Target,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { ChevronLeft, Lock, Target, Zap } from "lucide-react";
 import Link from "next/link";
-import { getPayload } from "payload";
-import config from "@payload-config";
-import { currentUser } from "@clerk/nextjs/server";
 import { SavingsPlan } from "@/payload-types";
 import DepositModal from "../deposit-modal";
 import { formatCurrency } from "@/lib/utils";
-import { notFound } from "next/navigation";
 import PlanTransactions from "./transactions";
-import { getPayloadCustomerByClerkId } from "@/lib/payload";
 import DailyContributionTracker from "./DailyContributionTracker";
+import WithdrawalModal from "../withdrawal-modal";
+import { getPlan } from "@/data/plans/getPlan";
+import CustomButton from "@/components/custom-button";
+import { Metadata } from "next";
+import { buttonVariants } from "@/components/ui/button";
 
-const SavingsDetailPage = async ({
-  planId,
-  userId,
+export const metadata: Metadata = {
+  title: "Saving Plan Details",
+};
+
+export default async function SavingsDetailsPage({
+  params,
 }: {
-  planId: string;
-  userId: string;
-}) => {
-  const plan = await getPlan(planId);
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const plan = await getPlan(id);
   const isDaily = plan.planType === "Daily";
   const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
   const isFixed = plan.planType === "Fixed";
 
-  const getIconAndColor = (type: SavingsPlan["planType"]) => {
-    switch (type) {
-      case "Target":
-        return {
-          icon: <Target className="h-6 w-6 text-green-500" />,
-          color: "text-green-500",
-          barColor: "bg-green-500",
-        };
-      case "Fixed":
-        return {
-          icon: <Lock className="h-6 w-6 text-blue-500" />,
-          color: "text-blue-500",
-          barColor: "bg-blue-500",
-        };
-      case "Daily":
-        return {
-          icon: <Zap className="h-6 w-6 text-yellow-500" />,
-          color: "text-yellow-500",
-          barColor: "bg-yellow-500",
-        };
-    }
-  };
   const { icon, barColor } = getIconAndColor(plan.planType);
 
   return (
     <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
       <header className="flex items-center space-x-4 mb-6">
-        <Button
-          size="icon"
-          variant="secondary"
-          className="rounded-full"
-          asChild
+        <Link
+          href="/dashboard/savings"
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
         >
-          <Link href="/dashboard/savings">
-            <ChevronLeft />
-          </Link>
-        </Button>
+          <ChevronLeft />
+        </Link>
+
         <div className="flex items-center space-x-3">
           <span className="hidden md:inline">{icon}</span>
           <h1 className="text-lg md:text-3xl font-bold text-gray-900 dark:text-white">
@@ -149,7 +116,7 @@ const SavingsDetailPage = async ({
             <h2 className="text-xl font-semibold text-gray-900 mb-4 dark:text-white">
               Transaction History
             </h2>
-            <PlanTransactions customerId={userId} planId={plan.id} />
+            <PlanTransactions planId={plan.id} />
           </div>
         </div>
 
@@ -161,59 +128,45 @@ const SavingsDetailPage = async ({
             </h2>
 
             <DepositModal planId={plan.id} />
-
-            <button className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition shadow-md flex items-center justify-center space-x-2">
-              <ArrowDown className="h-5 w-5" />
-              <span>Make a Withdrawal</span>
-            </button>
+            <WithdrawalModal planId={plan.id} />
 
             <div className="pt-4 border-t dark:border-gray-700 space-y-3">
-              <button className="w-full py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition">
+              <CustomButton variant="outline" className="w-full">
                 Edit Plan Settings
-              </button>
-              <button className="w-full py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition">
+              </CustomButton>
+              <CustomButton
+                variant="outline"
+                className="w-full text-red-600 border border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
+              >
                 Close/Mature Plan
-              </button>
+              </CustomButton>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+const getIconAndColor = (type: SavingsPlan["planType"]) => {
+  switch (type) {
+    case "Target":
+      return {
+        icon: <Target className="h-6 w-6 text-green-500" />,
+        color: "text-green-500",
+        barColor: "bg-green-500",
+      };
+    case "Fixed":
+      return {
+        icon: <Lock className="h-6 w-6 text-blue-500" />,
+        color: "text-blue-500",
+        barColor: "bg-blue-500",
+      };
+    case "Daily":
+      return {
+        icon: <Zap className="h-6 w-6 text-yellow-500" />,
+        color: "text-yellow-500",
+        barColor: "bg-yellow-500",
+      };
+  }
 };
-
-export default async function SavingsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  await pageAuthGuard("/savings");
-  const user = await getCurrentUser();
-  const customer = await getPayloadCustomerByClerkId(user.id);
-
-  if (!customer) {
-    throw new Error(`Customer with clerkId: ${user.id} not found`);
-  }
-
-  return <SavingsDetailPage planId={id} userId={user.id} />;
-}
-
-async function getPlan(planId: string) {
-  const payload = await getPayload({ config });
-  const user = await currentUser();
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  const plan = await payload.findByID({
-    collection: "savings-plans",
-    id: planId,
-  });
-
-  if (!plan) {
-    notFound();
-  }
-
-  return plan;
-}
