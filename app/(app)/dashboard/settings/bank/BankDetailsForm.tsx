@@ -1,16 +1,24 @@
 "use client";
+import AsyncSelect from "react-select/async";
 import CustomButton from "@/components/custom-button";
-import { FormInput, FormSelect } from "@/components/form-input";
+import { FormInput } from "@/components/form-input";
 import { z } from "zod";
 import {
   updateBankDetails,
   verifyAccountName,
 } from "@/server-actions/settings";
-import { Building, CircleUserRound, CreditCard, Lock } from "lucide-react";
+import {
+  AlertCircle,
+  Building,
+  CircleUserRound,
+  CreditCard,
+  Lock,
+} from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   bank: z.string().min(1, "Bank name is required"),
@@ -22,17 +30,7 @@ const formSchema = z.object({
   currentPassword: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default function BankDetailsForm({
-  banks,
-  bankCode,
-  accountNumber,
-  accountName,
-}: {
-  banks: any[];
-  accountNumber: string;
-  accountName: string;
-  bankCode: string;
-}) {
+export default function BankDetailsForm({ banks }: { banks: any[] }) {
   const {
     control,
     register,
@@ -43,9 +41,9 @@ export default function BankDetailsForm({
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bank: bankCode,
-      accountNumber: accountNumber,
-      accountName: accountName,
+      bank: "",
+      accountNumber: "",
+      accountName: "",
       currentPassword: "",
     },
   });
@@ -53,6 +51,20 @@ export default function BankDetailsForm({
   const isInitialMount = useRef(true);
 
   const [bank, accNumber] = watch(["bank", "accountNumber"]);
+
+  const bankLabelValue = banks.map((bank: any) => ({
+    label: bank.name,
+    value: bank.code,
+  }));
+
+  const promiseOptions = (inputValue: string) => {
+    return new Promise<{ label: string; value: string }[]>((resolve) => {
+      const filtered = bankLabelValue.filter((option) =>
+        option.label.toLowerCase().includes(inputValue.toLowerCase()),
+      );
+      resolve(filtered);
+    });
+  };
 
   useEffect(() => {
     const verifyAccount = async () => {
@@ -107,26 +119,62 @@ export default function BankDetailsForm({
         placeholder="Enter your account number"
       />
 
-      <Controller
-        control={control}
-        name="bank"
-        render={({ field }) => (
-          <FormSelect
-            label="Bank Name"
-            {...field}
-            onChange={(value) => {
-              field.onChange(value); // Update react-hook-form state
+      {/* one time react-select async component to improve performance of bank selection */}
+      <div className="space-y-2">
+        <Label
+          htmlFor="bank"
+          className="text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          Bank Name
+        </Label>
+
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-15">
+            <Building className="size-5" />
+          </span>
+          <AsyncSelect
+            id="bank"
+            cacheOptions
+            placeholder="Select a bank"
+            unstyled
+            defaultOptions={false}
+            loadOptions={promiseOptions}
+            classNames={{
+              control: ({ isFocused }) =>
+                `flex w-full text-sm rounded-lg border border-input bg-background p-3 pl-10 ring-offset-background placeholder:text-muted-foreground focus-within:border-primary/70 focus-within:ring-primary/70 focus-within:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 ${
+                  isFocused ? "border-ring" : "border-input"
+                }`,
+              menu: () =>
+                "relative mt-2 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80",
+              option: ({ isFocused, isSelected }) =>
+                `relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none transition-colors ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground"
+                    : isFocused
+                      ? "bg-accent text-accent-foreground"
+                      : ""
+                }`,
+              placeholder: () => "text-muted-foreground",
+              singleValue: () => "text-foreground text-sm",
+              multiValue: () =>
+                "bg-secondary text-secondary-foreground rounded-sm px-1 m-0.5",
+              multiValueLabel: () => "text-xs px-1",
+              multiValueRemove: () =>
+                "hover:bg-destructive hover:text-destructive-foreground rounded-sm",
+              input: () => "text-sm",
             }}
-            error={errors.bank?.message}
-            icon={<Building className="h-5 w-5" />}
-            options={banks.map((bank: any, index: number) => ({
-              label: bank.name,
-              value: bank.code,
-              key: index,
-            }))}
+            onChange={(option) =>
+              setValue("bank", option?.value || "", { shouldValidate: true })
+            }
           />
+        </div>
+        {errors.bank?.message && (
+          <p className="mt-1 flex items-center text-xs text-red-500">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {errors.bank.message}
+          </p>
         )}
-      />
+      </div>
 
       <FormInput
         id="accountName"

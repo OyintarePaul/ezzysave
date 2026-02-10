@@ -29,7 +29,7 @@ const paystackApiClient = (endpoint: string, method: string = "GET") => {
 
 export async function getBanks() {
   try {
-    const response = await paystackApiClient("/bank?country=nigeria&pay_with_bank=true");
+    const response = await paystackApiClient("/bank?country=nigeria");
     return response.data;
   } catch (error) {
     console.error("Error fetching banks from Paystack:", error);

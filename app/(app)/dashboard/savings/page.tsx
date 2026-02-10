@@ -5,7 +5,7 @@ import { SavingsPlan } from "@/payload-types";
 import { Metadata } from "next";
 import { SavingsPlanCard } from "./saving-plan-card";
 import { getSavingsPlans } from "@/data/plans/getSavingPlans";
-import CustomButton from "@/components/custom-button";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Savings Plans",
@@ -35,12 +35,14 @@ export default async function SavingPlansPage() {
             Ready to save smarter? Choose a plan that fits your goal!
           </p>
         </div>
-        <CustomButton asChild>
-          <Link href="/dashboard/savings/new" className="mt-4 sm:mt-0">
-            <Plus className="h-5 w-5" />
-            <span>New Plan</span>
-          </Link>
-        </CustomButton>
+
+        <Link
+          href="/dashboard/savings/new"
+          className={`mt-4 sm:mt-0 ${buttonVariants()}`}
+        >
+          <Plus className="h-5 w-5" />
+          <span>New Plan</span>
+        </Link>
       </div>
 
       {/* --- Active Plans Section --- */}

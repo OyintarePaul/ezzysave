@@ -1,6 +1,6 @@
 "use client";
 import CustomButton from "@/components/custom-button";
-import { FormInput } from "@/components/form-input";
+import { z } from "zod";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { formatCurrency } from "@/lib/utils";
@@ -16,6 +16,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useState, useTransition } from "react";
+import PageLayout from "../../components/page-layout";
 
 interface SavingsFormData {
   planType: "Daily" | "Target" | "Fixed";
@@ -32,20 +33,51 @@ interface SavingsFormData {
   dailyDays?: number;
 }
 
-const CreateSavingsPlanPage: React.FC = () => {
+
+
+const savingsFormSchema = z.discriminatedUnion("planType", [
+  // Daily Plan Logic
+  z.object({
+    planType: z.literal("Daily"),
+    planName: z.string().min(1, "Plan name is required"),
+    initialDeposit: z.number().min(0),
+    dailyAmount: z.number().min(50, "Daily amount is required"),
+    dailyDays: z.number().int().min(30, "Must be at least 30 day"),
+  }),
+
+  // Target Plan Logic
+  z.object({
+    planType: z.literal("Target"),
+    planName: z.string().min(1, "Plan name is required"),
+    initialDeposit: z.number().min(0),
+    targetAmount: z.number().min(1000, "Target amount is required"),
+    targetDate: z.date().min(1, "Target date is required"),
+  }),
+
+  // Fixed Plan Logic
+  z.object({
+    planType: z.literal("Fixed"),
+    planName: z.string().min(1, "Plan name is required"),
+    initialDeposit: z.number().min(0),
+    fixedAmount: z.number().min(3000, "Must be at least 3000"),
+    duration: z.number().int().min(3, "Must be at least 3 months"),
+  }),
+]);
+
+// type SavingsFormData = z.infer<typeof savingsFormSchema>;
+
+const CreateSavingsPlanPage = () => {
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState<SavingsFormData>({
     planType: "Target",
     planName: "",
-    initialDeposit: 100,
-    targetAmount: 5000,
-    targetDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
-      .toISOString()
-      .substring(0, 10),
-    dailyAmount: 5,
-    dailyDays: 365,
-    fixedAmount: 100,
-    duration: 12,
+    initialDeposit: 1000,
+    targetAmount: 0,
+    targetDate: undefined,
+    dailyAmount: 0,
+    dailyDays: 0,
+    fixedAmount: 0,
+    duration: 0,
   });
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error" | "info";
@@ -59,7 +91,7 @@ const CreateSavingsPlanPage: React.FC = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
     let val: string | number = value;
@@ -225,17 +257,11 @@ const CreateSavingsPlanPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
-      <header className="mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-          Start a New Savings Plan
-        </h1>
-        <p className="mt-1 text-gray-500 dark:text-gray-400">
-          Define your goal, choose a plan type, and set your initial
-          contribution.
-        </p>
-      </header>
-
+    <PageLayout
+      title="Start a New Savings Plan"
+      subtitle="Define your goal, choose a plan type, and set your initial
+          contribution."
+    >
       <Card className="p-6 space-y-8">
         {/* Step 1: Plan Type Selection */}
         <div>
@@ -343,7 +369,7 @@ const CreateSavingsPlanPage: React.FC = () => {
           </CustomButton>
         </form>
       </Card>
-    </div>
+    </PageLayout>
   );
 };
 
@@ -424,7 +450,7 @@ const InputGroup: React.FC<{
   min?: string | number;
   value: string | number;
   handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
   placeholder?: string;
   required?: boolean;

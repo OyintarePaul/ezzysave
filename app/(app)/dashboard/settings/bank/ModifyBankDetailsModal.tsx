@@ -21,8 +21,6 @@ export default function ModifyBankDetailsModal({
   accountName: string;
   bankCode: string;
 }) {
-
-  
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -36,12 +34,7 @@ export default function ModifyBankDetailsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <BankDetailsForm
-          banks={banks}
-          bankCode={bankCode}
-          accountNumber={accountNumber}
-          accountName={accountName}
-        />
+        <BankDetailsForm banks={banks} />
       </DialogContent>
     </Dialog>
   );

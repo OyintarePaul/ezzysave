@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle } from "lucide-react";
 import { ComponentProps } from "react";
+import AsyncSelect from "react-select/async";
+
 import {
   Select,
   SelectContent,
@@ -27,8 +29,6 @@ export const FormInput: React.FC<FormInputProps> = ({
   error,
   ...props
 }) => {
-  const commonClasses = "w-full rounded-lg";
-
   return (
     <div className="space-y-2">
       <Label
@@ -46,7 +46,7 @@ export const FormInput: React.FC<FormInputProps> = ({
         <Input
           {...props}
           id={id}
-          className={`${commonClasses} ${icon ? "pl-10" : "pl-4"} ${
+          className={`w-full rounded-lg ${icon ? "pl-10" : "pl-4"} ${
             error ? "border-red-500" : "border-gray-300"
           }`}
         />

@@ -5,7 +5,6 @@ export const getCurrentClerkUserId = async function () {
   if (!userId) {
     throw new Error("You are not logged in.");
   }
-  console.log("lib/auth.ts: Current Clerk User ID:", userId);
   return userId;
 };
 
