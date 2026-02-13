@@ -11,7 +11,7 @@ export default async function BankDetailsPage() {
     getBanks(),
   ]);
 
-  const bankName = banks.find((bank: any) => bank.code === customer.bankCode)?.name;
+  const bankName = banks.find((bank) => bank.code === customer.bankCode)?.name;
   console.log("Customer Bank Code:", customer.bankCode);
 
   return (
@@ -43,8 +43,8 @@ export default async function BankDetailsPage() {
                 </div>
                 <div>
                   <p className="text-sm font-black text-emerald-900 dark:text-emerald-400">
-                    {bankName || "Unknown Bank"}{" "}
-                    • **** {customer.accountNumber?.slice(-4)}
+                    {bankName || "Unknown Bank"} • ****{" "}
+                    {customer.accountNumber?.slice(-4)}
                   </p>
                   <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
                     Primary Payout Account
@@ -53,12 +53,7 @@ export default async function BankDetailsPage() {
               </div>
             </div>
 
-            <ModifyBankDetailsModal
-              bankCode={customer.bankCode || ""}
-              accountNumber={customer.accountNumber || ""}
-              accountName={customer.accountName || ""}
-              banks={banks || []}
-            />
+            <ModifyBankDetailsModal banks={banks || []} />
           </div>
         </CardContent>
       </Card>

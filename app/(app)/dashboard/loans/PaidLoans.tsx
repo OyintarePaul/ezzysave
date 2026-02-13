@@ -1,7 +1,6 @@
 import { formatCurrency } from "@/lib/utils";
 import { Loan } from "@/payload-types";
-import { Banknote, CheckCircle, CircleCheck, Clock } from "lucide-react";
-import MakePayment from "./make-payment";
+import { CircleCheck } from "lucide-react";
 
 export default async function PaidLoans({ loans }: { loans: Loan[] }) {
   const paidLoans = loans.filter((l) => l.status === "paidOff");
@@ -65,75 +64,3 @@ export default async function PaidLoans({ loans }: { loans: Loan[] }) {
     </div>
   );
 }
-
-const LoanHistoryItem: React.FC<{ loan: Loan }> = ({ loan }) => {
-  const amountWithInterest = loan.amount * ((100 + loan.interestRate!) / 100);
-  const progress = (loan.amountPaid! / amountWithInterest) * 100;
-  const balance = amountWithInterest - loan.amountPaid!;
-
-  let statusClass = "";
-  let barColor = "";
-  let icon;
-
-  switch (loan.status) {
-    case "approved":
-      statusClass = "bg-primary/20 text-primary";
-      barColor = "bg-primary";
-      icon = <Banknote className="w-5 h-5 text-primary" />;
-      break;
-    case "paidOff":
-      statusClass = "bg-green-200 text-green-900";
-      barColor = "bg-green-600";
-      icon = <CheckCircle className="w-5 h-5 text-green-600" />;
-      break;
-    case "deferred":
-      statusClass = "bg-yellow-200 text-yellow-900";
-      barColor = "bg-yellow-600";
-      icon = <Clock className="w-5 h-5 text-yellow-600" />;
-      break;
-  }
-
-  return (
-    <div className="p-4 border border-gray-200 rounded-xl bg-white dark:bg-gray-700 dark:border-gray-600 shadow-sm">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center space-x-2">
-          {icon}
-          <p className="text-lg font-semibold text-gray-900 dark:text-white">
-            Loan ID: {loan.id}
-          </p>
-        </div>
-        <span
-          className={`text-xs font-medium px-2 py-1 rounded-full capitalize ${statusClass}`}
-        >
-          {loan.status}
-        </span>
-      </div>
-
-      <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-        <span>Rate: {loan.interestRate!.toFixed(1)}%</span>
-      </div>
-
-      <div className="mt-3">
-        <p className="text-sm font-medium text-gray-900 dark:text-white">
-          Balance: {formatCurrency(balance)}
-        </p>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 dark:bg-gray-600">
-          <div
-            className={`h-2.5 rounded-full ${barColor}`}
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>{formatCurrency(loan.amountPaid!)} Paid</span>
-          <span>{progress.toFixed(0)}% Complete</span>
-        </div>
-      </div>
-
-      {(loan.status === "approved" || loan.status === "deferred") && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <MakePayment loan={loan} />
-        </div>
-      )}
-    </div>
-  );
-};

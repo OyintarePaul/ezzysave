@@ -1,9 +1,8 @@
-import CustomButton from "@/components/custom-button";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Loan } from "@/payload-types";
-import { CheckCheck, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCheck, CheckCircle2 } from "lucide-react";
 import ApprovedActions from "./ApprovedActions";
 
 export default function ApprovedLoan({ loan }: { loan: Loan }) {

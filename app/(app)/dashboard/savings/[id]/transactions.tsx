@@ -1,33 +1,10 @@
 import { getTransactions } from "@/data/transactions/getTransactions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Transaction } from "@/payload-types";
-import { ArrowDown, ArrowDownLeft, ArrowUp, ArrowUpRight, CircleCheck, TrendingUp } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CircleCheck } from "lucide-react";
 
 export default async function PlanTransactions({ planId }: { planId: string }) {
   const transactions = await getTransactions(planId);
-
-  const getTransactionIcon = (type: Transaction["type"]) => {
-    switch (type) {
-      case "Deposit":
-        return <ArrowUp className="h-4 w-4 text-green-500" />;
-      case "Withdrawal":
-        return <ArrowDown className="h-4 w-4 text-red-500" />;
-      case "Interest":
-        return <TrendingUp className="h-4 w-4 text-yellow-500" />;
-    }
-  };
-
-  const getTransactionAmountClass = (type: Transaction["type"]) => {
-    switch (type) {
-      case "Deposit":
-        return "text-green-600 font-semibold";
-      case "Withdrawal":
-        return "text-red-600 font-semibold";
-      case "Interest":
-        return "text-yellow-600 font-semibold";
-    }
-  };
-
   return (
     <div className="space-y-3">
       {transactions.length > 0 ? (
@@ -42,7 +19,6 @@ export default async function PlanTransactions({ planId }: { planId: string }) {
     </div>
   );
 }
-
 
 interface TransactionItemProps {
   transaction: Transaction;

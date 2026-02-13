@@ -1,7 +1,9 @@
 "use server";
+import { createRecipientCode, resolveAccount } from "@/data/paystack";
 import { getCurrentClerkUserId, verifyPassword } from "@/lib/auth";
 import { getPayloadClient } from "@/lib/payload";
-import { createRecipientCode, resolveAccount } from "@/lib/paystack";
+import { bankUpdateForm } from "@/lib/schema/bank-update-form";
+import { ServerActionResponse } from "@/lib/types";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 
@@ -80,9 +82,9 @@ export async function updatePinAction({
 export async function verifyAccountName(
   accountNumber: string,
   bankCode: string,
-): Promise<ActionResponse<string>> {
+): Promise<ServerActionResponse<string>> {
   try {
-    const response = await resolveAccount(accountNumber, bankCode);
+    const response = await resolveAccount({ accountNumber, bankCode });
     if (!response.status) {
       return {
         success: false,
@@ -94,6 +96,7 @@ export async function verifyAccountName(
       data: response.data.account_name,
     };
   } catch (error) {
+    console.log(error)
     return {
       success: false,
       message: "An unexpected error occured.",
@@ -101,17 +104,26 @@ export async function verifyAccountName(
   }
 }
 
-export async function updateBankDetails(
-  accountNumber: string,
-  bankCode: string,
-  password: string,
-): Promise<ActionResponse<null>> {
+export async function updateBankDetails(formData: {
+  accountNumber: string;
+  bankCode: string;
+  password: string;
+}): Promise<ServerActionResponse> {
   try {
+    // validate
+    const { success, data } = bankUpdateForm.safeParse(formData);
+    if (!success) {
+      return {
+        success: false,
+        message: "Bad input. Please check your input.",
+      };
+    }
+
     // authenticate user and get user id
     const id = await getCurrentClerkUserId();
 
     // verify password
-    const verified = await verifyPassword(id, password);
+    const verified = await verifyPassword(id, data.currentPassword);
     if (!verified)
       return {
         success: false,
@@ -120,38 +132,29 @@ export async function updateBankDetails(
 
     // reverify bank details and get account name
     // change bankCode from 001 to bankCode
-    const resolveResponse = await resolveAccount(accountNumber, bankCode);
-    if (!resolveResponse.status) {
-      return {
-        success: false,
-        message: "Unable to verify bank details.",
-      };
-    }
+    const resolveResponse = await resolveAccount({
+      accountNumber: data.accountNumber,
+      bankCode: data.bankCode,
+    });
 
-    const accountName = resolveResponse.data.account_name;
+    const accountName = resolveResponse.account_name;
 
     // create recipient code
-    const recipientCodeRes = await createRecipientCode(
-      accountNumber,
-      bankCode,
+    const recipientCodeRes = await createRecipientCode({
+      accountNumber: data.accountNumber,
+      bankCode: data.bankCode,
       accountName,
-    );
+    });
 
-    if (!recipientCodeRes.status) {
-      return {
-        success: false,
-        message: "An unexpected error occured.",
-      };
-    }
-    const recipientCode = recipientCodeRes.data.recipient_code;
+    const recipientCode = recipientCodeRes.recipient_code;
 
     // make update in payload
     const payload = await getPayloadClient();
     await payload.update({
       collection: "customers",
       data: {
-        bankCode,
-        accountNumber,
+        bankCode: data.bankCode,
+        accountNumber: data.accountNumber,
         accountName,
         recipientCode,
       },

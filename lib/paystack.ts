@@ -410,52 +410,9 @@ export async function listBanks() {
   return response.json();
 }
 
-export async function resolveAccount(accountNumber: string, bankCode: string) {
-  const response = await fetch(
-    `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
-      },
-    },
-  );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Paystack initialization error:", errorData);
-    throw new Error(`Paystack initialization failed: ${response.statusText}`);
-  }
-  return response.json();
-}
 
-export async function createRecipientCode(
-  accountNumber: string,
-  bankCode: string,
-  accountName: string,
-) {
-  const response = await fetch("https://api.paystack.co/transferrecipient", {
-    method: "POST",
-    body: JSON.stringify({
-      type: "nuban",
-      name: accountName,
-      account_number: accountNumber,
-      bank_code: bankCode,
-      currency: "NGN",
-    }),
-    headers: {
-      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
-      "Content-Type": "application/json",
-    },
-  });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Paystack initialization error:", errorData);
-    throw new Error(`Paystack initialization failed: ${response.statusText}`);
-  }
-  return response.json();
-}
 
 export async function initiateTransfer({
   recipientCode,

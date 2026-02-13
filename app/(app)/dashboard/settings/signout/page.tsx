@@ -1,16 +1,9 @@
-"use client";
-import CustomButton from "@/components/custom-button";
-import { useClerk } from "@clerk/nextjs";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { ChevronLeft, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import PageLayout from "../../components/page-layout";
+import SignOut from "./SignOut";
 
 export default function SignOutPage() {
-  const { signOut } = useClerk();
-
   return (
     <PageLayout
       title="Sign Out"
@@ -29,25 +22,7 @@ export default function SignOutPage() {
             <p className="text-sm text-muted-foreground mb-8 font-medium">
               Are you sure you want to end your session?
             </p>
-            <div className="space-y-3">
-              <CustomButton
-                variant="destructive"
-                className="w-full"
-                onClick={() => signOut()}
-              >
-                Yes, Log Me Out
-              </CustomButton>
-              <Link
-                href="/dashboard/settings"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "lg",
-                  className: "w-full text-muted-foreground",
-                })}
-              >
-                Keep Session Active
-              </Link>
-            </div>
+            <SignOut />
           </CardContent>
         </Card>
       </div>

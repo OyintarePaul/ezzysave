@@ -1,13 +1,9 @@
 "use client";
 import CustomButton from "@/components/custom-button";
 import { FormInput } from "@/components/form-input";
-import { useUser } from "@clerk/nextjs";
 import { Mail, Phone, User } from "lucide-react";
-import { useTransition } from "react";
 
 export default function UpdateProfileForm() {
-  const { user } = useUser();
-  const [isPending, startTransition] = useTransition();
   return (
     <div className="space-y-4">
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -37,9 +33,7 @@ export default function UpdateProfileForm() {
           icon={<Phone className="h-5 w-5" />}
         />
       </form>
-      <CustomButton type="button" isPending={isPending}>
-        Update Profile
-      </CustomButton>
+      <CustomButton type="button">Update Profile</CustomButton>
     </div>
   );
 }

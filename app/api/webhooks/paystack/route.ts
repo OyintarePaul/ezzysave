@@ -1,10 +1,6 @@
 import crypto from "crypto";
 import { NextRequest } from "next/server";
-import {
-  handleChargeSuccess,
-  handleTransferSuccess,
-  verifyPaystackTransaction,
-} from "@/lib/paystack";
+import { handleChargeSuccess, handleTransferSuccess } from "@/lib/paystack";
 
 export const POST = async (req: NextRequest) => {
   try {

@@ -9,18 +9,9 @@ import {
 } from "@/components/ui/dialog";
 
 import BankDetailsForm from "./BankDetailsForm";
+import { Bank } from "@/lib/types";
 
-export default function ModifyBankDetailsModal({
-  banks,
-  bankCode,
-  accountNumber,
-  accountName,
-}: {
-  banks: any[];
-  accountNumber: string;
-  accountName: string;
-  bankCode: string;
-}) {
+export default function ModifyBankDetailsModal({ banks }: { banks: Bank[] }) {
   return (
     <Dialog>
       <DialogTrigger asChild>

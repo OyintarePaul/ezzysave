@@ -1,7 +1,6 @@
 import "server-only";
 import { getPayloadClient } from "@/lib/payload";
 import { cache } from "react";
-import { z } from "zod";
 import { getCurrentClerkUserId } from "@/lib/auth";
 
 export const getCurrentPayloadCustomer = cache(async function () {

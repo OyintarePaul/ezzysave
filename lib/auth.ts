@@ -18,6 +18,7 @@ export async function verifyPassword(userId: string, password: string) {
 
     return verified;
   } catch (error) {
+    console.log(error);
     return false;
   }
 }

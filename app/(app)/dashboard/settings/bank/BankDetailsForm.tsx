@@ -2,7 +2,6 @@
 import AsyncSelect from "react-select/async";
 import CustomButton from "@/components/custom-button";
 import { FormInput } from "@/components/form-input";
-import { z } from "zod";
 import {
   updateBankDetails,
   verifyAccountName,
@@ -14,34 +13,25 @@ import {
   CreditCard,
   Lock,
 } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { toast } from "sonner";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
+import { Bank } from "@/lib/types";
+import { BankUpdateData, bankUpdateForm } from "@/lib/schema/bank-update-form";
 
-const formSchema = z.object({
-  bank: z.string().min(1, "Bank name is required"),
-  accountNumber: z
-    .string()
-    .min(10, "Account number must be at least 10 digits")
-    .max(10, "Account number must be at most 10 digits"),
-  accountName: z.string().min(1, "Account name is not yet verified"),
-  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-export default function BankDetailsForm({ banks }: { banks: any[] }) {
+export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
   const {
-    control,
     register,
     setValue,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  } = useForm<BankUpdateData>({
+    resolver: zodResolver(bankUpdateForm),
     defaultValues: {
-      bank: "",
+      bankCode: "",
       accountNumber: "",
       accountName: "",
       currentPassword: "",
@@ -50,9 +40,9 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
   const [isPending, startTransition] = useTransition();
   const isInitialMount = useRef(true);
 
-  const [bank, accNumber] = watch(["bank", "accountNumber"]);
+  const [bank, accNumber] = watch(["bankCode", "accountNumber"]);
 
-  const bankLabelValue = banks.map((bank: any) => ({
+  const bankLabelValue = banks.map((bank) => ({
     label: bank.name,
     value: bank.code,
   }));
@@ -83,7 +73,6 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
       }
     };
 
-    console.log(isInitialMount.current);
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else {
@@ -91,13 +80,13 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
     }
   }, [bank, accNumber]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: BankUpdateData) => {
     startTransition(async () => {
-      const response = await updateBankDetails(
-        values.accountNumber,
-        values.bank,
-        values.currentPassword,
-      );
+      const response = await updateBankDetails({
+        accountNumber: values.accountNumber,
+        bankCode: values.bankCode,
+        password: values.currentPassword,
+      });
 
       if (!response.success) {
         toast.error(response.message);
@@ -154,14 +143,16 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
               input: () => "text-sm",
             }}
             onChange={(option) =>
-              setValue("bank", option?.value || "", { shouldValidate: true })
+              setValue("bankCode", option?.value || "", {
+                shouldValidate: true,
+              })
             }
           />
         </div>
-        {errors.bank?.message && (
+        {errors.bankCode?.message && (
           <p className="mt-1 flex items-center text-xs text-red-500">
             <AlertCircle className="h-3 w-3 mr-1" />
-            {errors.bank.message}
+            {errors.bankCode.message}
           </p>
         )}
       </div>
@@ -196,9 +187,7 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
         placeholder="Enter password to authorize"
         autoComplete="new-password"
       />
-      <CustomButton size="sm" disabled={isPending} isPending={isPending}>
-        Update Bank Details
-      </CustomButton>
+      <CustomButton isPending={isPending}>Update Bank Details</CustomButton>
     </form>
   );
 }

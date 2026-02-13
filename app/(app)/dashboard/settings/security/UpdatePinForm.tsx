@@ -1,48 +1,34 @@
 "use client";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import CustomButton from "@/components/custom-button";
 import { FormInput } from "@/components/form-input";
 import { updatePinAction } from "@/server-actions/settings";
 import { Lock } from "lucide-react";
-import React, { useState, useTransition } from "react";
+import React, { useTransition } from "react";
 import { toast } from "sonner";
-
-const formSchema = z
-  .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    newPin: z
-      .string()
-      .length(4, "PIN must be exactly 4 digits")
-      .regex(/^\d+$/, "PIN must be numeric"),
-    confirmPin: z
-      .string()
-      .length(4, "PIN must be exactly 4 digits")
-      .regex(/^\d+$/, "PIN must be numeric"),
-  })
-  .refine((data: any) => data.newPin === data.confirmPin, {
-    message: "New PIN and Confirm PIN must match",
-  });
+import {
+  PinUpdateData,
+  pinUpdateFormSchema,
+} from "@/lib/schema/pin-update-form";
 
 export default function UpdatePinForm() {
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors },
-  } = useForm<z.infer<typeof formSchema>>({
+  } = useForm<PinUpdateData>({
     defaultValues: {
       password: "",
       newPin: "",
       confirmPin: "",
     },
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(pinUpdateFormSchema),
   });
 
   const [isPending, startTransition] = useTransition();
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: PinUpdateData) => {
     startTransition(async () => {
       const response = await updatePinAction({
         pin: values.newPin,

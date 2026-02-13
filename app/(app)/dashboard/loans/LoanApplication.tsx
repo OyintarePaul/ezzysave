@@ -1,4 +1,4 @@
-import { CircleCheck, FileText, Percent, TriangleAlert } from "lucide-react";
+import { CircleCheck, FileText, Percent } from "lucide-react";
 import LoanApplicationModal from "./LoanApplicationModal"
 
 export default function LoanApplicationSection() {

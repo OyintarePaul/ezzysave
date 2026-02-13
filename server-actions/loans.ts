@@ -1,6 +1,5 @@
 "use server";
 import { v4 as uuid } from "uuid";
-
 import { getPayloadClient } from "@/lib/payload";
 import { initiateTransfer } from "@/lib/paystack";
 import { revalidatePath } from "next/cache";
@@ -23,10 +22,10 @@ export async function submitLoanApplication(
 
     const customer = await getCurrentPayloadCustomer();
     const payload = await getPayloadClient();
-    const response = await payload.create({
+    await payload.create({
       collection: "loans",
       data: {
-        ...loanData,
+        ...data,
         customer: customer.id,
       },
     });

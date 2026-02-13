@@ -1,4 +1,8 @@
-import { createPayloadCustomer, deletePayloadCustomer, updatePayloadCustomer } from "@/lib/payload";
+import {
+  createPayloadCustomer,
+  deletePayloadCustomer,
+  updatePayloadCustomer,
+} from "@/lib/payload";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { NextRequest } from "next/server";
 
@@ -25,20 +29,20 @@ export async function POST(req: NextRequest) {
 
     if (evt.type == "user.updated") {
       // Handle user update
-        try {
-          const updatedUser = await updatePayloadCustomer(evt.data.id, {
-            firstName: evt.data.first_name || "",
-            lastName: evt.data.last_name || "",
-            email: evt.data.email_addresses[0]?.email_address,
-            phone:
-              evt.data.phone_numbers.length > 0
-                ? evt.data.phone_numbers[0].phone_number
-                : undefined,
-          });
-          console.log("Updated Payload customer:", updatedUser);
-        } catch (e) {
-          console.error("Error updating Payload customer:", e);
-        }
+      try {
+        const updatedUser = await updatePayloadCustomer(evt.data.id, {
+          firstName: evt.data.first_name || "",
+          lastName: evt.data.last_name || "",
+          email: evt.data.email_addresses[0]?.email_address,
+          phone:
+            evt.data.phone_numbers.length > 0
+              ? evt.data.phone_numbers[0].phone_number
+              : undefined,
+        });
+        console.log("Updated Payload customer:", updatedUser);
+      } catch (e) {
+        console.error("Error updating Payload customer:", e);
+      }
     }
 
     if (evt.type == "user.deleted") {
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
       }
     }
   } catch (e) {
-    console.error("Error verifying webhook");
+    console.error("Error verifying webhook", e);
     return new Response("Error Verifying webhook", { status: 400 });
   }
 

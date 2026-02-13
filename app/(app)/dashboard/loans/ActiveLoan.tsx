@@ -1,11 +1,8 @@
-import CustomButton from "@/components/custom-button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, } from "@/components/ui/card";
 import { formatCurrency, loanAmountWithInterest } from "@/lib/utils";
 import { Loan } from "@/payload-types";
 import { addMonths } from "date-fns";
 import {
-  Banknote,
-  Calendar,
   Clock,
   Percent,
   ReceiptText,

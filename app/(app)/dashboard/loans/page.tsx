@@ -1,10 +1,7 @@
-import LoansList from "./PaidLoans";
-import { Suspense } from "react";
 import ActiveLoan from "./ActiveLoan";
 import PendingLoan from "./PendingLoan";
 import LoanApplicationSection from "./LoanApplication";
 import ApprovedLoan from "./ApprovedLoan";
-import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
 import { getLoans } from "@/data/loan/getLoans";
 import PaidLoans from "./PaidLoans";
 

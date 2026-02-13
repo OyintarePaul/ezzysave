@@ -1,10 +1,8 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle } from "lucide-react";
 import { ComponentProps } from "react";
-import AsyncSelect from "react-select/async";
 
 import {
   Select,
