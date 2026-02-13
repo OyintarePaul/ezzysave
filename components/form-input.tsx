@@ -17,48 +17,54 @@ import {
 } from "@/components/ui/select";
 
 export interface FormInputProps extends ComponentProps<typeof Input> {
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   error?: string | null;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
-  id,
   label,
+  hidden,
   icon,
   error,
   ...props
 }) => {
   return (
-    <div className="space-y-2">
-      <Label
-        htmlFor={id}
-        className="text-sm font-medium text-gray-700 dark:text-gray-300"
-      >
-        {label}
-      </Label>
-      <div className="relative">
-        {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            {icon}
-          </span>
-        )}
-        <Input
-          {...props}
-          id={id}
-          className={`w-full rounded-lg ${icon ? "pl-10" : "pl-4"} ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
-        />
-      </div>
+    <>
+      {hidden ? (
+        <input hidden {...props} />
+      ) : (
+        <div className="space-y-2">
+          <Label
+            htmlFor={props.name}
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            {label}
+          </Label>
+          <div className="relative">
+            {icon && (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                {icon}
+              </span>
+            )}
+            <Input
+              {...props}
+              id={props.name}
+              className={`w-full rounded-lg ${icon ? "pl-10" : "pl-4"} ${
+                error ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+          </div>
 
-      {error && (
-        <p className="mt-1 flex items-center text-xs text-red-500">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          {error}
-        </p>
+          {error && (
+            <p className="mt-1 flex items-center text-xs text-red-500">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {error}
+            </p>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
@@ -102,8 +108,7 @@ interface FormSelectProps
   error?: string | null;
   label: string;
   icon?: React.ReactNode;
-  // react hook form onChange handler signature: (name: string, value: string) => void
-  onChange: (value: string) => void;
+  onChange: (value: string | number) => void;
   options: { label: string; value: string; key: string | number }[];
 }
 

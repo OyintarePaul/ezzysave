@@ -1,95 +1,78 @@
 "use server";
 import { SavingsPlan } from "@/payload-types";
-import { getPayload } from "payload";
-import config from "@payload-config";
-import { currentUser } from "@clerk/nextjs/server";
 import { getPayloadClient } from "@/lib/payload";
 import { revalidatePath } from "next/cache";
 import { v4 as uuid } from "uuid";
 import { initiateTransfer } from "@/lib/paystack";
 import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
+import { savingsSchema, type SavingsFormData } from "@/lib/schema/savings";
+import { type ServerActionResponse } from "@/lib/types";
+import {
+  WithdrawalFormData,
+  withdrawalFormSchema,
+} from "@/lib/schema/withdrawal-form";
 
-type CreateSavingsPlanResponse =
-  | {
-      status: "success";
-      message: string;
-      data: SavingsPlan;
-    }
-  | {
-      status: "error";
-      message: string;
-      data: null;
-    };
-
-export async function createSavingsPlan(
-  data: Omit<SavingsPlan, "id" | "createdAt" | "updatedAt" | "user">,
-): Promise<CreateSavingsPlanResponse> {
-  const payload = await getPayload({ config });
-  const user = await currentUser();
-  if (!user) {
-    return {
-      status: "error",
-      message: "User not authenticated",
-      data: null,
-    };
-  }
-
-  let customer;
+export async function createSavingsPlanAction(
+  formData: SavingsFormData,
+): Promise<ServerActionResponse<SavingsPlan>> {
   try {
-    customer = await getCurrentPayloadCustomer();
-    if (!customer) {
-      throw new Error("An unexpected error occured");
+    const { success, data } = savingsSchema.safeParse(formData);
+    if (!success) {
+      return {
+        success: false,
+        message: "Bad input. Please check your input",
+      };
     }
-  } catch (e) {
-    console.error("Error fetching customer:", e);
-    return {
-      status: "error",
-      message: "Failed to create savings plan. Please, try again",
-      data: null,
-    };
-  }
-
-  try {
+    const payload = await getPayloadClient();
+    const customer = await getCurrentPayloadCustomer();
+    console.log("Creating  new plan with data", data);
     const newPlan = await payload.create({
       collection: "savings-plans",
       data: { ...data, customer: customer.id || "" },
     });
 
     return {
-      status: "success",
+      success: true,
       message: "Savings plan created successfully",
       data: newPlan,
     };
-  } catch (error) {
-    console.error("Error creating savings plan:", error);
+  } catch (e) {
+    console.error("Error fetching customer:", e);
     return {
-      status: "error",
+      success: false,
       message: "Failed to create savings plan. Please, try again",
-      data: null,
     };
   }
 }
 
-export async function withdrawFromPlan(planId: string, amount: number) {
+export async function withdrawFromPlan(
+  formData: WithdrawalFormData,
+): Promise<ServerActionResponse> {
   try {
-    const customer = await getCurrentPayloadCustomer();
-    if (!customer) {
-      return { success: false, error: "Customer not found." };
+    // validate incoming data
+    const { success, data } = withdrawalFormSchema.safeParse(formData);
+
+    if (!success) {
+      return {
+        success: false,
+        message: "Bad input. Please check your input",
+      };
     }
 
+    const customer = await getCurrentPayloadCustomer();
     const payload = await getPayloadClient();
 
     // get loan details
     const plan = await payload.findByID({
       collection: "savings-plans",
-      id: planId,
+      id: data.planId,
     });
 
     // check if amount is greater than current balance
-    if (amount > (plan.currentBalance || 0)) {
+    if (data.amount > (plan.currentBalance || 0)) {
       return {
         success: false,
-        error: "Withdrawal amount exceeds current balance.",
+        message: "Withdrawal amount exceeds current balance.",
       };
     }
 
@@ -97,7 +80,7 @@ export async function withdrawFromPlan(planId: string, amount: number) {
     const pendingTransactions = await payload.find({
       collection: "transactions",
       where: {
-        plan: { equals: planId },
+        plan: { equals: data.planId },
         or: [
           {
             status: { equals: "pending" },
@@ -113,7 +96,7 @@ export async function withdrawFromPlan(planId: string, amount: number) {
       );
       return {
         success: false,
-        error: "There is already a pending disbursement for this plan.",
+        message: "There is already a pending disbursement for this plan.",
       };
     }
 
@@ -121,11 +104,11 @@ export async function withdrawFromPlan(planId: string, amount: number) {
     const txResponse = await payload.create({
       collection: "transactions",
       data: {
-        plan: planId,
+        plan: data.planId,
         customer: customer.id,
         category: "Savings",
         description: `${plan.planType} Savings Withdrawal: ${plan.planName}`,
-        amount,
+        amount: data.amount,
         type: "Withdrawal",
         status: "pending",
         paystackRef: uuid(),
@@ -134,21 +117,25 @@ export async function withdrawFromPlan(planId: string, amount: number) {
 
     // initiate transfer via paystack
     const initiateTransferResponse = await initiateTransfer({
-      amount: amount * 100 * 0.98, // convert to kobo and account for 2% fee
+      amount: data.amount * 100 * 0.98, // convert to kobo and account for 2% fee
       recipientCode: customer.recipientCode!,
       reason: `Withdrawal - ${plan.planName}`,
       reference: txResponse.paystackRef!,
     });
 
     console.log(
-      `Disbursed amount ${amount} to customer ${customer.id} for plan ${planId}`,
+      `Disbursed amount ${data.amount} to customer ${customer.id} for plan ${data.planId}`,
       initiateTransferResponse,
     );
 
     revalidatePath("/dashboard/savings-plans");
-    return { success: true };
+    return {
+      success: true,
+      message:
+        "Withdrawal initiated successfully. You will be credited shortly.",
+    };
   } catch (error) {
     console.error("Error withdrawing from savings plan:", error);
-    return { success: false, error: "Failed to withdraw from savings plan." };
+    return { success: false, message: "Failed to withdraw from savings plan." };
   }
 }

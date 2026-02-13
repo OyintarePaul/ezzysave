@@ -1,69 +1,68 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { FormInput } from "../../../../components/form-input";
 import { ArrowDown, DollarSign, Info } from "lucide-react";
 import CustomButton from "@/components/custom-button";
 import { toast } from "sonner";
 import { withdrawFromPlan } from "@/server-actions/savings-plans";
+import { SavingsPlan } from "@/payload-types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  WithdrawalFormData,
+  withdrawalFormSchema,
+} from "@/lib/schema/withdrawal-form";
 
-export default function WithdrawalModal({ planId }: { planId: string }) {
-  const [withdrawalData, setWithdrawalData] = useState({
-    amount: 0,
+export default function WithdrawalModal({ plan }: { plan: SavingsPlan }) {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<WithdrawalFormData>({
+    resolver: zodResolver(withdrawalFormSchema),
+    defaultValues: {
+      amount: 0,
+      planId: plan.id,
+    },
   });
-  const [isPending, startTransition] = useTransition();
 
+  const amount = watch("amount");
+  const [isPending, startTransition] = useTransition();
   const FEE_PERCENTAGE = 0.02; // 2%
-  const amount = withdrawalData.amount;
+
   const serviceFee = amount * FEE_PERCENTAGE;
   const netAmount = amount - serviceFee;
+  const isFixed = plan.planType === "Fixed";
+  const isMatured = plan.status === "Matured";
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value, type } = e.target;
-
-    let val: string | number = value;
-
-    // Use the number conversion logic you asked about
-    if (type === "number" || name === "amount") {
-      val = value === "" ? 0 : parseFloat(value);
-      if (isNaN(val)) val = 0;
-    }
-
-    setWithdrawalData((prev) => ({ ...prev, [name]: val }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting withdrawal:", withdrawalData);
-    // Simulate API call
+  const onSubmit = (values: WithdrawalFormData) => {
     startTransition(async () => {
-      const response = await withdrawFromPlan(planId, withdrawalData.amount);
+      const response = await withdrawFromPlan(values);
       if (!response.success) {
-        toast.error(response.error || "Unable to initiate withdrawal.");
+        toast.error(response.message || "Unable to initiate withdrawal.");
         return;
       }
-      toast.success(
-        "Withdrawal initiated successfully. You will be credited shortly.",
-      );
+      toast.success(response.message);
     });
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <CustomButton className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600">
+        <CustomButton
+          className="w-full bg-destructive text-white hover:bg-red-600"
+          disabled={isFixed && !isMatured}
+        >
           <ArrowDown className="h-5 w-5" />
           <span>Make a Withdrawal</span>
         </CustomButton>
@@ -78,18 +77,19 @@ export default function WithdrawalModal({ planId }: { planId: string }) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FormInput {...register("planId")} id="planId" hidden readOnly />
           <FormInput
+            {...register("amount", { valueAsNumber: true })}
             id="amount"
             label="Amount ($)"
             type="number"
-            value={withdrawalData.amount}
-            onChange={handleChange}
             placeholder="e.g., 5000"
             icon={<DollarSign className="h-5 w-5" />}
+            error={errors.amount?.message}
           />
 
-          {amount > 0 && (
+          {amount >= 100 && (
             <div className="p-5 bg-primary/10 rounded-2xl border border-indigo-100 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-primary font-bold">
@@ -118,19 +118,14 @@ export default function WithdrawalModal({ planId }: { planId: string }) {
           )}
 
           <div className="flex justify-end space-x-4 pt-4 border-t">
-            <button
-              type="button"
-              className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition"
-            >
-              Cancel
-            </button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="px-6 py-2.5 font-semibold h-auto"
-            >
-              {isPending ? "Processing..." : "Make withdrawal"}
-            </Button>
+            <DialogClose asChild>
+              <CustomButton type="button" variant="secondary">
+                Cancel
+              </CustomButton>
+            </DialogClose>
+            <CustomButton type="submit" isPending={isPending}>
+              Make Withdrawal
+            </CustomButton>
           </div>
         </form>
       </DialogContent>

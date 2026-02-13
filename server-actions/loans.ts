@@ -5,31 +5,23 @@ import { getPayloadClient } from "@/lib/payload";
 import { initiateTransfer } from "@/lib/paystack";
 import { revalidatePath } from "next/cache";
 import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
-
-interface submitLoadApplicationParams {
-  amount: number;
-  purpose: string;
-  duration: number;
-}
-
-interface submitLoanApplicationResponse {
-  success: boolean;
-  error?: string;
-}
+import { ServerActionResponse } from "@/lib/types";
+import { LoanFormData, loanFormSchema } from "@/lib/schema/loan-form";
 
 export async function submitLoanApplication(
-  loanData: submitLoadApplicationParams,
-): Promise<submitLoanApplicationResponse> {
-  const customer = await getCurrentPayloadCustomer();
-
+  loanData: LoanFormData,
+): Promise<ServerActionResponse> {
   try {
-    console.log(
-      "Submitting loan application: ",
-      loanData,
-      " for customer: ",
-      customer.id,
-    );
+    // validate data
+    const { success, data } = loanFormSchema.safeParse(loanData);
+    if (!success) {
+      return {
+        success: false,
+        message: "Bad input. Please check your input.",
+      };
+    }
 
+    const customer = await getCurrentPayloadCustomer();
     const payload = await getPayloadClient();
     const response = await payload.create({
       collection: "loans",
@@ -38,12 +30,11 @@ export async function submitLoanApplication(
         customer: customer.id,
       },
     });
-    console.log("Loan application submitted successfully:", response);
     revalidatePath("/dashboard/loans");
-    return { success: true };
+    return { success: true, message: "Loan application was successful." };
   } catch (error) {
     console.error("Error submitting loan application:", error);
-    return { success: false, error: "Failed to submit loan application." };
+    return { success: false, message: "Failed to submit loan application." };
   }
 }
 

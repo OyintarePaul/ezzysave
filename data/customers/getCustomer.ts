@@ -13,10 +13,7 @@ export const getCurrentPayloadCustomer = cache(async function () {
       clerkId: { equals: clerkUserId },
     },
     select: {
-      recipientCode: true,
-      bankCode: true,
-      accountNumber: true,
-      accountName: true
+      withdrawalPin: false
     },
   });
 

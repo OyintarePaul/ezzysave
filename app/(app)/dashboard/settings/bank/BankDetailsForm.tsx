@@ -69,7 +69,7 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
   useEffect(() => {
     const verifyAccount = async () => {
       console.log("running verify account");
-      if (accNumber && accNumber.length === 10) {
+      if (accNumber && accNumber.length === 10 && bank !== "") {
         startTransition(async () => {
           const response = await verifyAccountName(accNumber, bank);
           if (response.success) {
@@ -109,16 +109,6 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <FormInput
-        id="accountNumber"
-        label="Account Number"
-        type="text"
-        {...register("accountNumber")}
-        error={errors.accountNumber?.message}
-        icon={<CreditCard className="h-5 w-5" />}
-        placeholder="Enter your account number"
-      />
-
       {/* one time react-select async component to improve performance of bank selection */}
       <div className="space-y-2">
         <Label
@@ -175,6 +165,16 @@ export default function BankDetailsForm({ banks }: { banks: any[] }) {
           </p>
         )}
       </div>
+
+      <FormInput
+        id="accountNumber"
+        label="Account Number"
+        type="text"
+        {...register("accountNumber")}
+        error={errors.accountNumber?.message}
+        icon={<CreditCard className="h-5 w-5" />}
+        placeholder="Enter your account number"
+      />
 
       <FormInput
         id="accountName"

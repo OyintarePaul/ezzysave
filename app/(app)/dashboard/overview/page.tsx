@@ -3,6 +3,13 @@ import Link from "next/link";
 import { getDashboardStats } from "@/data/dashboard/getStats";
 import { DollarSign } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import PageLayout from "../components/page-layout";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
+
 export default async function OverviewPage() {
   const {
     totalSaved,
@@ -12,15 +19,10 @@ export default async function OverviewPage() {
     approvedLoan,
   } = await getDashboardStats();
   return (
-    // Added pb-20 padding to push content up above the fixed bottom navigation on mobile
-    <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        Dashboard Overview
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        Welcome back! Here's a summary of your financial progress.
-      </p>
-
+    <PageLayout
+      title="Dashboard Overview"
+      subtitle="Welcome back! Here's a summary of your financial progress."
+    >
       {/* Overview Cards Grid: Responsive adjustments (2 columns on small, 4 on large) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
         <OverviewCard
@@ -122,7 +124,7 @@ export default async function OverviewPage() {
           </CustomButton>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

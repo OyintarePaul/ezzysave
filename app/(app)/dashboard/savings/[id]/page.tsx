@@ -1,5 +1,4 @@
-import { ChevronLeft, Lock, Target, Zap } from "lucide-react";
-import Link from "next/link";
+import { Lock, Target, Zap } from "lucide-react";
 import { SavingsPlan } from "@/payload-types";
 import DepositModal from "../deposit-modal";
 import { formatCurrency } from "@/lib/utils";
@@ -9,11 +8,19 @@ import WithdrawalModal from "../withdrawal-modal";
 import { getPlan } from "@/data/plans/getPlan";
 import CustomButton from "@/components/custom-button";
 import { Metadata } from "next";
-import { buttonVariants } from "@/components/ui/button";
+import PageLayout from "../../components/page-layout";
 
-export const metadata: Metadata = {
-  title: "Saving Plan Details",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const plan = await getPlan(id);
+  return {
+    title: plan.planName,
+  };
+}
 
 export default async function SavingsDetailsPage({
   params,
@@ -29,29 +36,19 @@ export default async function SavingsDetailsPage({
   const { icon, barColor } = getIconAndColor(plan.planType);
 
   return (
-    <div className="p-4 sm:p-8 space-y-8 pb-20 lg:pb-8">
-      <header className="flex items-center space-x-4 mb-6">
-        <Link
-          href="/dashboard/savings"
-          className={buttonVariants({ variant: "ghost", size: "icon" })}
-        >
-          <ChevronLeft />
-        </Link>
-
+    <PageLayout
+      title={
         <div className="flex items-center space-x-3">
           <span className="hidden md:inline">{icon}</span>
-          <h1 className="text-lg md:text-3xl font-bold text-gray-900 dark:text-white">
-            {plan.planName}
-          </h1>
+          <span>{plan.planName}</span>
           <span className="text-sm font-medium px-3 py-1 bg-primary/10 text-primary rounded-full ">
             {plan.planType} Plan
           </span>
         </div>
-      </header>
-      <p className="text-gray-600 dark:text-gray-400">
-        Detailed view of your savings progress and transaction history.
-      </p>
-
+      }
+      subtitle="Detailed view of your savings progress and transaction history."
+      backHref="/dashboard/savings"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Section 1: Progress & Actions (Col 1 & 2) */}
         <div className="lg:col-span-2 space-y-6">
@@ -127,8 +124,8 @@ export default async function SavingsDetailsPage({
               Quick Actions
             </h2>
 
-            <DepositModal planId={plan.id} />
-            <WithdrawalModal planId={plan.id} />
+            <DepositModal plan={plan} />
+            <WithdrawalModal plan={plan} />
 
             <div className="pt-4 border-t dark:border-gray-700 space-y-3">
               <CustomButton variant="outline" className="w-full">
@@ -144,7 +141,7 @@ export default async function SavingsDetailsPage({
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

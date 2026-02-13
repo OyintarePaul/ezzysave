@@ -16,10 +16,8 @@ const CustomButton = ({
   return (
     <Button
       {...props}
-      className={cn(
-        "px-6 py-2.5 font-semibold h-auto cursor-pointer",
-        className,
-      )}
+      disabled={isPending}
+      className={cn("px-6 py-3 font-semibold h-auto cursor-pointer", className)}
     >
       {isPending ? (
         <span className="flex items-center gap-2">

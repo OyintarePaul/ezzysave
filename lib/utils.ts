@@ -1,13 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import PaystackPop from "@paystack/inline-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function progressBarColor(plan: string) {
@@ -41,5 +36,3 @@ export const loanAmountWithInterest = (
 ): number => {
   return parseInt(((amount * (100 + interestRate)) / 100).toFixed(0));
 };
-
-

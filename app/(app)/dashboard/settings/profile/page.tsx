@@ -15,7 +15,7 @@ export default function Profile() {
             Personal Information
           </h3>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <UpdateProfileForm />
         </CardContent>
       </Card>

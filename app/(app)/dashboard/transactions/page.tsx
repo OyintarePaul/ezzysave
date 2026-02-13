@@ -164,7 +164,7 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
           className={`flex items-center justify-end text-xs font-medium dark:opacity-80 mt-1`}
         >
           <CircleCheck className="h-3 w-3 mr-1" />
-          Complete
+          {transaction.status}
         </p>
       </div>
     </li>

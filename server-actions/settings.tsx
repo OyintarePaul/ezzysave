@@ -163,6 +163,7 @@ export async function updateBankDetails(
     });
 
     // return
+    revalidatePath("/dashboard/settings/bank");
     return {
       success: true,
       message: "Account Details updated successfully.",

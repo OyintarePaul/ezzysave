@@ -24,7 +24,7 @@ export default function PageLayout({
             <ChevronLeft />
           </Link>
         )}
-        <h1 className="text-3xl font-extrabold text-foreground">{title}</h1>
+        <h1 className="text-lg md:text-3xl font-bold md:font-extrabold text-foreground">{title}</h1>
       </header>
       <p className="mt-1 text-gray-500 dark:text-gray-400">{subtitle}</p>
 

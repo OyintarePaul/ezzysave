@@ -86,7 +86,7 @@ export const SavingsPlanCard = ({ plan }: { plan: SavingsPlan }) => {
               ></div>
             </div>
             <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
-              {progress.toFixed(1)}% Complete
+              {progress ? progress.toFixed(1): 0}% Complete
             </p>
           </>
         )}

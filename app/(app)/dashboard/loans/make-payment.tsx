@@ -61,7 +61,7 @@ export default function MakePayment({ loan }: { loan: Loan }) {
         return;
       }
 
-      window.location.href = response.link;
+      window.location.href = response.data as string;
     });
   };
 
