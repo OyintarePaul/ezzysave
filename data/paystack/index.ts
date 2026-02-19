@@ -1,10 +1,17 @@
-import { Bank } from "@/lib/types";
-import { cache } from "react";
 import "server-only";
+import { cache } from "react";
+import {
+  BankArray,
+  bankArraySchema,
+  ReceipientCode,
+  receipientCodeSchema,
+  ResolveAccount,
+  resolveAccountSchema,
+} from "@/lib/schema/paystack";
 const BASE_URL = "https://api.paystack.co";
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
-const paystackApiClient = async (
+const paystackClient = async (
   endpoint: string,
   method: string = "GET",
   body?: BodyInit,
@@ -35,26 +42,21 @@ const paystackApiClient = async (
     );
   }
 
-  const result = await response.json();
+  const resultJson = await response.json();
 
-  if (!result.status) {
-    console.error(`Paystack Business Logic Error on ${endpoint}:`, result);
+  if (!resultJson.status) {
+    console.error(`Paystack Business Logic Error on ${endpoint}:`, resultJson);
     throw new Error(
-      result.message || "Paystack reported an unsuccessful operation.",
+      resultJson.message || "Paystack reported an unsuccessful operation.",
     );
   }
 
-  return result;
+  return resultJson;
 };
 
-export const getBanks: () => Promise<Bank[]> = cache(async function () {
-  try {
-    const response = await paystackApiClient("/bank?country=nigeria");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching banks from Paystack:", error);
-    throw new Error("Failed to fetch banks from Paystack.");
-  }
+export const getBanks: () => Promise<BankArray> = cache(async function () {
+  const response = await paystackClient("/bank?country=nigeria");
+  return bankArraySchema.parse(response.data);
 });
 
 export async function resolveAccount({
@@ -63,16 +65,11 @@ export async function resolveAccount({
 }: {
   accountNumber: string;
   bankCode: string;
-}) {
-  try {
-    const response = await paystackApiClient(
-      `/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
-    );
-    return response.data;
-  } catch (e) {
-    console.error("Error resolving account from Paystack:", e);
-    throw new Error("Failed to resolve from Paystack.");
-  }
+}): Promise<ResolveAccount> {
+  const response = await paystackClient(
+    `/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+  );
+  return resolveAccountSchema.parse(response.data);
 }
 
 export async function createRecipientCode({
@@ -83,23 +80,18 @@ export async function createRecipientCode({
   accountNumber: string;
   bankCode: string;
   accountName: string;
-}) {
-  try {
-    const response = await paystackApiClient(
-      "/trasnferrecipient",
-      "POST",
-      JSON.stringify({
-        type: "nuban",
-        name: accountName,
-        account_number: accountNumber,
-        bank_code: bankCode,
-        currency: "NGN",
-      }),
-    );
+}): Promise<ReceipientCode> {
+  const response = await paystackClient(
+    "/trasnferrecipient",
+    "POST",
+    JSON.stringify({
+      type: "nuban",
+      name: accountName,
+      account_number: accountNumber,
+      bank_code: bankCode,
+      currency: "NGN",
+    }),
+  );
 
-    return response.data;
-  } catch (e) {
-    console.error("Error Creating recipient code:", e);
-    throw new Error("Failed to create recipient code.");
-  }
+  return receipientCodeSchema.parse(response.data["recipient_code"]);
 }
