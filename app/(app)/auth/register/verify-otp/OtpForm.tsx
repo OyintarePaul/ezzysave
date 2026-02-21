@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useRef, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { z } from "zod";
 import { useSignUp } from "@clerk/nextjs";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useRouter } from "next/navigation";
 import CustomButton from "@/components/custom-button";
 import {
@@ -46,7 +47,6 @@ export default function OtpForm() {
         setError({ type: "error", message: "Please enter the 6-digit code." });
         return;
       }
-
       if (!isLoaded) return;
 
       try {
@@ -54,35 +54,93 @@ export default function OtpForm() {
           code: parsedOtp,
         });
 
-        if (completeSignup.status !== "complete") {
+        if (completeSignup.status == "complete") {
+          await setActive({ session: completeSignup.createdSessionId });
+          router.replace("/dashboard/overview");
+        }
+      } catch (e) {
+        if (isClerkAPIResponseError(e)) {
+          const clerkError = e.errors[0];
+          switch (clerkError.code) {
+            case "form_param_value_invalid":
+              setError({
+                type: "error",
+                message:
+                  "That code doesn't look right. Please check and try again.",
+              });
+              break;
+            case "verification_expired":
+              setError({
+                type: "error",
+                message: "This code has expired. Please request a new one.",
+              });
+              break;
+            case "too_many_attempts":
+              setError({
+                type: "error",
+                message:
+                  "Too many failed attempts. Please wait a while before trying again.",
+              });
+              break;
+            default:
+              setError({
+                type: "error",
+                message: clerkError.longMessage || "An unknown error occurred.",
+              });
+          }
+        } else {
+          // Handle non-clerk errors (network issues, etc.)
           setError({
             type: "error",
-            message: "OTP verification failed. Please try again.",
+            message:
+              "OTP verification failed. Please check your connection and try again.",
           });
-          return;
         }
-        await setActive({ session: completeSignup.createdSessionId });
-        router.replace("/dashboard/overview");
-      } catch (e) {
-        console.log(e);
-        setError({
-          type: "error",
-          message: "OTP verification failed. Please try again.",
-        });
-        return;
       }
     });
   };
 
   const handleResend = () => {
     startResending(async () => {
-      if (!isLoaded) return;
+      if (!isLoaded || !signUp) return;
+
+      // Only attempt if the timer has reached zero
       if (resendTimer === 0) {
-        await signUp.prepareEmailAddressVerification({
-          strategy: "email_code",
-        });
-        setResendTimer(60); // Reset timer
-        setError({ type: "info", message: "New code sent! Check your inbox." });
+        try {
+          await signUp.prepareEmailAddressVerification({
+            strategy: "email_code",
+          });
+
+          // SUCCESS
+          setResendTimer(60); // Reset the cooldown
+          setError({
+            type: "info",
+            message: "New code sent! Check your inbox.",
+          });
+        } catch (err: unknown) {
+          // ERROR HANDLING
+          if (isClerkAPIResponseError(err)) {
+            const clerkError = err.errors[0];
+
+            if (clerkError.code === "too_many_attempts") {
+              setError({
+                type: "error",
+                message:
+                  "Too many requests. Please wait a moment before trying again.",
+              });
+            } else {
+              setError({
+                type: "error",
+                message: clerkError.longMessage || "Failed to resend code.",
+              });
+            }
+          } else {
+            setError({
+              type: "error",
+              message: "Unable to resend OTP. Please try again.",
+            });
+          }
+        }
       }
     });
   };

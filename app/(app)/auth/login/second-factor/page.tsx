@@ -1,27 +1,25 @@
 "use client";
 import { ShieldCheck } from "lucide-react";
-import OtpForm from "./OtpForm";
-import { useSignUp } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import OtpForm from "./OtpForm";
+
 const VerifyOtpPage = () => {
-  const { isLoaded, signUp } = useSignUp();
+  const { isLoaded, signIn } = useSignIn();
   const router = useRouter();
 
   useEffect(() => {
     // Only run this logic once Clerk has finished loading
     if (isLoaded) {
       // If there is no sign-up object OR no email has been submitted yet
-      if (!signUp || !signUp.emailAddress) {
-        console.warn(
-          "No pending sign-up found. Redirecting to sign-up page...",
-        );
+      if (!signIn || !signIn.identifier) {
         router.push("/auth/register");
       }
     }
-  }, [isLoaded, signUp, router]);
+  }, [isLoaded, signIn, router]);
 
-  const pendingEmail = signUp?.emailAddress || "";
+  const pendingEmail = signIn?.identifier || "";
 
   return (
     <>
@@ -36,7 +34,7 @@ const VerifyOtpPage = () => {
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
           We've sent a 6-digit code to{" "}
-          <span className="text-gray-900 dark:text-gray-200 font-bold">
+          <span className="text-gray-900 dark:text-gray-200 font-bold block">
             {pendingEmail}
           </span>
         </p>

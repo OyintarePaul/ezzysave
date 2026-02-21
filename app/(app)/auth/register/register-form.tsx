@@ -54,7 +54,7 @@ const RegisterForm = () => {
         await signUp.prepareEmailAddressVerification({
           strategy: "email_code",
         });
-        router.replace("/auth/verify-otp");
+        router.replace("/auth/register/verify-otp");
       } catch (err) {
         console.log(err);
         toast.error("Unable to create your account. Please, try again");

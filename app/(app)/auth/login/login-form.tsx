@@ -1,8 +1,7 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { FormInput } from "@/components/form-input";
-import { Mail, Lock, AlertCircle, LogIn } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { Mail, Lock } from "lucide-react";
 import CustomButton from "@/components/custom-button";
 import { useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -43,6 +42,9 @@ const LoginForm = () => {
           const redirectUrl =
             searchParams.get("returnTo") || "/dashboard/overview";
           router.replace(redirectUrl);
+        } else if (result.status == "needs_second_factor") {
+          await prepareMFA();
+          router.push("/auth/login/second-factor");
         } else {
           console.log(result.status);
           toast.error("Unexpected sign-in status. Please try again.");
@@ -52,6 +54,22 @@ const LoginForm = () => {
         toast.error("Login failed. Please, try again");
       }
     });
+  };
+
+  const prepareMFA = async () => {
+    if (!isLoaded) return;
+    if (!signIn.supportedFirstFactors) return;
+    // Find the factor the user has enabled (usually 'email_code' or 'phone_code')
+    const factor = signIn.supportedFirstFactors.find(
+      (f) => f.strategy === "email_code",
+    );
+
+    if (factor) {
+      await signIn.prepareFirstFactor({
+        strategy: "email_code",
+        emailAddressId: factor.emailAddressId,
+      });
+    }
   };
 
   return (
