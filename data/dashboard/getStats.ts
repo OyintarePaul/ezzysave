@@ -1,9 +1,8 @@
 import "server-only";
 import { getPayloadClient } from "@/lib/payload";
-import { getCurrentPayloadCustomer } from "../customers/getCustomer";
 
-export async function getDashboardStats() {
-  const { id: customerId } = await getCurrentPayloadCustomer();
+export async function getDashboardStats(customerId: string) {
+  
   const payload = await getPayloadClient();
 
   const plansPromise = payload.find({

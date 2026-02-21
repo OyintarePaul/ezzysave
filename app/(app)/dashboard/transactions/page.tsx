@@ -1,4 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
+import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
 import { getTransactions } from "@/data/transactions/getTransactions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Transaction } from "@/payload-types";
@@ -23,7 +24,8 @@ export default async function Transactions({
   searchParams: Promise<{ filter: string }>;
 }) {
   const params = await searchParams;
-  const transactions = await getTransactions(undefined, 100); // Fetch up to 100 transactions for better filtering on the client side
+  const { id } = await getCurrentPayloadCustomer();
+  const transactions = await getTransactions(id, undefined, 100); // Fetch up to 100 transactions for better filtering on the client side
   const activeFilter = params.filter || "All";
 
   const filterOptions = [
@@ -130,19 +132,19 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
     ? "bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400"
     : "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400";
 
-  const formattedAmount = formatCurrency(Math.abs(transaction.amount));
+  const formattedAmount = formatCurrency(transaction.amount);
   const DirectionIcon = isCredit ? ArrowDownLeft : ArrowUpRight; // Influx/Outflux relative to the user's account
 
   return (
     <li className="flex justify-between items-center py-4 border-b last:border-b-0 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-100 px-1">
       {/* Icon & Main Details (Left side) */}
-      <div className="flex items-center space-x-3 sm:space-x-4 flex-grow min-w-0">
+      <div className="flex items-center space-x-2 sm:space-x-4 flex-grow min-w-0">
         <div
           className={`p-2 rounded-lg flex-shrink-0 ${iconBg} hidden sm:block`}
         >
           <DirectionIcon className="h-5 w-5" />
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="font-bold text-xs md:text-base text-gray-900 dark:text-white truncate">
             {transaction.description}
           </p>

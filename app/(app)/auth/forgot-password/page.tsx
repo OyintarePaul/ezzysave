@@ -28,7 +28,7 @@ const ForgotPasswordPage = () => {
   if (!isLoaded) return null;
 
   const handleRequestCode = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     e.preventDefault();
     setError("");
@@ -58,7 +58,7 @@ const ForgotPasswordPage = () => {
       // Error handling in a real app would use the caught error object
       console.log(err);
       setError(
-        "Failed to send reset code. Please verify the email and try again."
+        "Failed to send reset code. Please verify the email and try again.",
       );
     } finally {
       setIsLoading(false);
@@ -66,7 +66,7 @@ const ForgotPasswordPage = () => {
   };
 
   const handleVerifyAndSetPassword = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     e.preventDefault();
     setError("");
@@ -102,7 +102,7 @@ const ForgotPasswordPage = () => {
     } catch (err) {
       console.log(err);
       setError(
-        "Verification failed. The code may be invalid or expired. Try requesting a new code."
+        "Verification failed. The code may be invalid or expired. Try requesting a new code.",
       );
     } finally {
       setIsLoading(false);
@@ -269,62 +269,60 @@ const ForgotPasswordPage = () => {
     getStepContent();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 font-sans">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700">
-        {/* Header Section */}
-        <div className="text-center space-y-3 mb-8">
-          <div className="flex justify-center items-center text-primary">
-            <TrendingUp className="h-10 w-10 stroke-[1.5]" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-            {title}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">{description}</p>
+    <>
+      {/* Header Section */}
+      <div className="text-center space-y-3 mb-8">
+        <div className="flex justify-center items-center text-primary">
+          <TrendingUp className="h-10 w-10 stroke-[1.5]" />
         </div>
-
-        {/* Main Content (Form or Success Message) */}
-        {form}
-
-        {/* Footer Links */}
-        {footerLink && (
-          <div className="mt-6 text-center text-sm">
-            <p>
-              <a
-                href="/auth/login"
-                onClick={(e) => {
-                  // Only prevent default navigation if we are in step 2 and want to handle back logic
-                  if (step === 2) {
-                    e.preventDefault();
-                    // handleBackToLogin();
-                  }
-                }}
-                className="font-medium text-primary"
-              >
-                {footerLink}
-              </a>
-            </p>
-          </div>
-        )}
-
-        {/* Back button for Step 2 */}
-        {showBackButton && (
-          <div className="mt-6">
-            <CustomButton
-              onClick={() => {
-                setStep(1); // Go back to email entry
-                setError("");
-                setCode("");
-                setNewPassword("");
-              }}
-              className="w-full text-gray-600 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              Change Email Address
-            </CustomButton>
-          </div>
-        )}
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+          {title}
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400">{description}</p>
       </div>
-    </div>
+
+      {/* Main Content (Form or Success Message) */}
+      {form}
+
+      {/* Footer Links */}
+      {footerLink && (
+        <div className="mt-6 text-center text-sm">
+          <p>
+            <a
+              href="/auth/login"
+              onClick={(e) => {
+                // Only prevent default navigation if we are in step 2 and want to handle back logic
+                if (step === 2) {
+                  e.preventDefault();
+                  // handleBackToLogin();
+                }
+              }}
+              className="font-medium text-primary"
+            >
+              {footerLink}
+            </a>
+          </p>
+        </div>
+      )}
+
+      {/* Back button for Step 2 */}
+      {showBackButton && (
+        <div className="mt-6">
+          <CustomButton
+            onClick={() => {
+              setStep(1); // Go back to email entry
+              setError("");
+              setCode("");
+              setNewPassword("");
+            }}
+            className="w-full text-gray-600 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Change Email Address
+          </CustomButton>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -11,12 +11,13 @@ const CustomButton = ({
   className,
   children,
   isPending,
+  disabled,
   ...props
 }: CustomButtonProps) => {
   return (
     <Button
       {...props}
-      disabled={isPending}
+      disabled={isPending || disabled}
       className={cn("px-6 py-3 font-semibold h-auto cursor-pointer", className)}
     >
       {isPending ? (
