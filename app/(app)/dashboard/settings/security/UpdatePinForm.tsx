@@ -31,7 +31,7 @@ export default function UpdatePinForm() {
   const onSubmit = (values: PinUpdateData) => {
     startTransition(async () => {
       const response = await updatePinAction({
-        pin: values.newPin,
+        newPin: values.newPin,
         confirmPin: values.confirmPin,
         password: values.password,
       });

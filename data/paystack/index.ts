@@ -8,20 +8,20 @@ import {
   ResolveAccount,
   resolveAccountSchema,
 } from "@/lib/schema/paystack";
+import { ActionResponse } from "@/lib/types";
 const BASE_URL = "https://api.paystack.co";
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 const paystackClient = async (
   endpoint: string,
   method: string = "GET",
-  body?: BodyInit,
+  body?: Record<string, any>,
 ) => {
   if (!PAYSTACK_SECRET_KEY) {
     throw new Error(
       "Paystack secret key is not defined in environment variables.",
     );
   }
-
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers: {
@@ -65,11 +65,30 @@ export async function resolveAccount({
 }: {
   accountNumber: string;
   bankCode: string;
-}): Promise<ResolveAccount> {
-  const response = await paystackClient(
-    `/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
-  );
-  return resolveAccountSchema.parse(response.data);
+}): Promise<ActionResponse<ResolveAccount>> {
+  try {
+    const response = await paystackClient(
+      `/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+    );
+
+    // Parse the data using your Zod schema
+    const validatedData = resolveAccountSchema.parse(response.data);
+
+    return {
+      success: true,
+      message: "Account resolved successfully",
+      data: validatedData,
+    };
+  } catch (error: any) {
+    // This catches Paystack API errors (404, 422) and Zod parsing errors
+    console.error("Account Resolution Failed:", error.message);
+
+    return {
+      success: false,
+      message:
+        "Could not verify your account details. Please check the number and bank.",
+    };
+  }
 }
 
 export async function createRecipientCode({
@@ -80,18 +99,64 @@ export async function createRecipientCode({
   accountNumber: string;
   bankCode: string;
   accountName: string;
-}): Promise<ReceipientCode> {
-  const response = await paystackClient(
-    "/trasnferrecipient",
-    "POST",
-    JSON.stringify({
+}): Promise<ActionResponse<ReceipientCode>> {
+  try {
+    const response = await paystackClient("/trasnferrecipient", "POST", {
       type: "nuban",
       name: accountName,
       account_number: accountNumber,
       bank_code: bankCode,
       currency: "NGN",
-    }),
-  );
+    });
 
-  return receipientCodeSchema.parse(response.data["recipient_code"]);
+    return {
+      success: true,
+      data: receipientCodeSchema.parse(response.data),
+      message: "Recipient code created successfully",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to create recipient code.",
+    };
+  }
+}
+
+export async function initiateTransfer({
+  recipientCode,
+  amount,
+  reason,
+  reference,
+}: {
+  recipientCode: string;
+  amount: number;
+  reason: string;
+  reference: string;
+}) {
+  try {
+    const koboAmount = Math.round(amount * 100);
+    const result = await paystackClient("/transfer", "POST", {
+      source: "balance",
+      amount: koboAmount,
+      recipient: recipientCode,
+      reference,
+      reason,
+    });
+
+    // If we reached here, Paystack successfully queued the transfer
+    return {
+      success: true,
+      message: result.message || "Transfer initiated successfully.",
+      data: result.data, // Contains transfer_code and other details
+    };
+  } catch (error: any) {
+    // 4. Handle the error thrown by paystackClient
+    console.error("Transfer Initiation Failed:", error.message);
+    return {
+      success: false,
+      message:
+        error.message ||
+        "An unexpected error occurred with the payment provider.",
+    };
+  }
 }

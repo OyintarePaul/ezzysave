@@ -39,7 +39,6 @@ const RegisterForm = () => {
     lastName,
   }: RegisterFormData) => {
     startTransition(async () => {
-      console.log("Registeration started");
       if (!isLoaded) {
         return;
       }
@@ -60,7 +59,6 @@ const RegisterForm = () => {
         toast.error("Unable to create your account. Please, try again");
       }
     });
-    // Simulate API call for registration
   };
 
   return (

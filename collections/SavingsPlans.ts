@@ -12,6 +12,12 @@ export const SavingsPlans: CollectionConfig = {
       required: true,
     },
     {
+      name: "planType",
+      type: "select",
+      options: ["Target", "Fixed", "Daily"],
+      required: true,
+    },
+    {
       name: "customer",
       type: "relationship",
       relationTo: "customers",
@@ -21,12 +27,6 @@ export const SavingsPlans: CollectionConfig = {
       type: "select",
       options: ["Active", "Matured"],
       defaultValue: "Active",
-    },
-    {
-      name: "planType",
-      type: "select",
-      options: ["Target", "Fixed", "Daily"],
-      required: true,
     },
     {
       name: "currentBalance",
@@ -49,14 +49,14 @@ export const SavingsPlans: CollectionConfig = {
       name: "targetAmount",
       type: "number",
       admin: {
-        condition: (data) => data.type === "Target",
+        condition: (data) => data.planType === "Target",
       },
     },
     {
       name: "targetDate",
       type: "date",
       admin: {
-        condition: (data) => data.type === "Target",
+        condition: (data) => data.planType === "Target",
       },
     },
 
@@ -65,21 +65,21 @@ export const SavingsPlans: CollectionConfig = {
       name: "fixedAmount",
       type: "number",
       admin: {
-        condition: (data) => data.type === "Fixed",
+        condition: (data) => data.planType === "Fixed",
       },
     },
     {
       name: "duration",
       type: "number", // in months
       admin: {
-        condition: (data) => data.type === "Fixed",
+        condition: (data) => data.planType === "Fixed",
       },
     },
     {
       name: "maturityDate",
       type: "date",
       admin: {
-        condition: (data) => data.type === "Fixed",
+        condition: (data) => data.planType === "Fixed",
       },
     },
 
@@ -89,14 +89,14 @@ export const SavingsPlans: CollectionConfig = {
       name: "dailyAmount",
       type: "number",
       admin: {
-        condition: (data) => data.type === "Daily",
+        condition: (data) => data.planType === "Daily",
       },
     },
     {
       name: "numberOfDays",
       type: "number",
       admin: {
-        condition: (data) => data.type === "Daily",
+        condition: (data) => data.planType === "Daily",
       },
     },
   ],

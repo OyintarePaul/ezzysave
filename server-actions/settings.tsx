@@ -1,102 +1,114 @@
 "use server";
-import { createRecipientCode, resolveAccount } from "@/data/paystack";
-import { getCurrentClerkUserId, verifyPassword } from "@/lib/auth";
-import { getPayloadClient } from "@/lib/payload";
-import { bankUpdateForm } from "@/lib/schema/bank-update-form";
-import { ServerActionResponse } from "@/lib/types";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
-
-interface ActionResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
+import {
+  getCurrentClerkUserId,
+  isRecentlyVerified,
+  verifyPassword,
+} from "@/lib/auth";
+import { getPayloadClient } from "@/lib/payload";
+import { bankUpdateForm } from "@/lib/schema/bank-update-form";
+import { pinUpdateFormSchema } from "@/lib/schema/pin-update-form";
+import { ServerActionResponse } from "@/lib/types";
+import { createRecipientCode, resolveAccount } from "@/data/paystack";
 
 export async function updatePinAction({
-  pin,
+  newPin,
   confirmPin,
   password,
 }: {
-  pin: string;
+  newPin: string;
   confirmPin: string;
   password: string;
-}): Promise<ActionResponse<null>> {
+}): Promise<ServerActionResponse> {
   try {
-    // authenticate user and get user id
-    const id = await getCurrentClerkUserId();
+    const { success, data } = pinUpdateFormSchema.safeParse({
+      newPin,
+      confirmPin,
+      password,
+    });
+
+    if (!success) {
+      return {
+        success: false,
+        message: "Invalid input. Please check your entries.",
+      };
+    }
+
+    const userId = await getCurrentClerkUserId();
 
     // verify password
-    const verified = await verifyPassword(id, password);
-    if (!verified)
+    const isCorrectPassowrd = await verifyPassword(userId, password);
+    if (!isCorrectPassowrd)
       return {
         success: false,
-        message: "Password is wrong",
+        message: "Wrong password. Try again.",
       };
 
-    // make sure pin is exactly 4 digits
-    if (pin.length != 4)
+    // check if user has recently verified with otp
+    const isRecentlyVerifiedResult = await isRecentlyVerified();
+    if (!isRecentlyVerifiedResult) {
       return {
         success: false,
-        message: "Pin must be 4 digits",
+        message: "OTP verification is required to perform this action.",
       };
-
-    // comfirm equality of pin and comfirm pin
-    if (pin !== confirmPin)
-      return {
-        success: false,
-        message: "Pin mismatch",
-      };
+    }
 
     // hash pin
-    const hashedPin = await bcrypt.hash(pin, 10);
+    const hashedPin = await bcrypt.hash(data.newPin, 10);
 
     // make update in payload
     const payload = await getPayloadClient();
-    await payload.update({
+    const result = await payload.update({
       collection: "customers",
       data: {
         withdrawalPin: hashedPin,
       },
       where: {
         clerkId: {
-          equals: id,
+          equals: userId,
         },
       },
     });
 
+    if (result.docs.length === 0) {
+      return { success: false, message: "Customer profile not found." };
+    }
+
     revalidatePath("/dashboard/settings/security");
+
     return {
       success: true,
-      message: "Pin updated successfully.",
+      message: "Your withdrawal PIN has been updated successfully.",
     };
   } catch (error) {
-    console.log(error);
+    console.error("PIN_UPDATE_ERROR:", error);
     return {
       success: false,
-      message: "An unexpected error occured. Please try again.",
+      message: "An unexpected error occurred. Please try again.",
     };
   }
 }
 
-export async function verifyAccountName(
+export async function verifyAccountNameAction(
   accountNumber: string,
   bankCode: string,
 ): Promise<ServerActionResponse<string>> {
   try {
     const response = await resolveAccount({ accountNumber, bankCode });
-    if (!response.status) {
+    if (!response.success) {
       return {
         success: false,
-        message: "Account not found",
+        message: response.message,
       };
     }
     return {
       success: true,
+      message: response.message,
       data: response.data.account_name,
     };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return {
       success: false,
       message: "An unexpected error occured.",
@@ -104,9 +116,10 @@ export async function verifyAccountName(
   }
 }
 
-export async function updateBankDetails(formData: {
+export async function updateBankDetailsAction(formData: {
   accountNumber: string;
   bankCode: string;
+  accountName: string;
   password: string;
 }): Promise<ServerActionResponse> {
   try {
@@ -120,16 +133,24 @@ export async function updateBankDetails(formData: {
     }
 
     // authenticate user and get user id
-    const id = await getCurrentClerkUserId();
+    const userId = await getCurrentClerkUserId();
 
     // verify password
-    const verified = await verifyPassword(id, data.currentPassword);
-    if (!verified)
+    const isCorrectPassowrd = await verifyPassword(userId, data.password);
+    if (!isCorrectPassowrd)
       return {
         success: false,
-        message: "Password is wrong",
+        message: "Incorrect password. Please try again.",
       };
 
+    // check if user has recently verified with otp
+    const isRecentlyVerifiedResult = await isRecentlyVerified();
+    if (!isRecentlyVerifiedResult) {
+      return {
+        success: false,
+        message: "OTP verification is required to perform this action.",
+      };
+    }
     // reverify bank details and get account name
     // change bankCode from 001 to bankCode
     const resolveResponse = await resolveAccount({
@@ -137,36 +158,52 @@ export async function updateBankDetails(formData: {
       bankCode: data.bankCode,
     });
 
-    const accountName = resolveResponse.account_name;
+    if (!resolveResponse.success) {
+      return {
+        success: false,
+        message: resolveResponse.message,
+      };
+    }
+
+    const accountName = resolveResponse.data.account_name;
 
     // create recipient code
-    const recipientCodeRes = await createRecipientCode({
+    const recipientCodeResponse = await createRecipientCode({
       accountNumber: data.accountNumber,
       bankCode: data.bankCode,
       accountName,
     });
 
-    const recipientCode = recipientCodeRes.recipient_code;
+    if (!recipientCodeResponse.success) {
+      return {
+        success: false,
+        message: recipientCodeResponse.message,
+      };
+    }
 
     // make update in payload
     const payload = await getPayloadClient();
-    await payload.update({
+    const result = await payload.update({
       collection: "customers",
       data: {
         bankCode: data.bankCode,
         accountNumber: data.accountNumber,
         accountName,
-        recipientCode,
+        recipientCode: recipientCodeResponse.data.recipient_code,
       },
       where: {
         clerkId: {
-          equals: id,
+          equals: userId,
         },
       },
     });
 
-    // return
+    if (result.docs.length === 0) {
+      return { success: false, message: "Customer profile not found." };
+    }
+
     revalidatePath("/dashboard/settings/bank");
+
     return {
       success: true,
       message: "Account Details updated successfully.",

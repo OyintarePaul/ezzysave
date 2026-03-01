@@ -7,7 +7,7 @@ export const bankUpdateForm = z.object({
     .min(10, "Account number must be at least 10 digits")
     .max(10, "Account number must be at most 10 digits"),
   accountName: z.string().min(1, "Account name is not yet verified"),
-  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export type BankUpdateData = z.infer<typeof bankUpdateForm>;

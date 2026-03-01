@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { z } from "zod";
 import { useSignIn } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
@@ -20,7 +20,6 @@ export default function OtpForm() {
   const [otp, setOtp] = useState("");
   const [isVerifying, startVerify] = useTransition();
   const [isResending, startResending] = useTransition();
-  // Using an object for error/message handling to manage type (error, success, info)
   const [error, setError] = useState<{
     type: "error" | "info" | "success";
     message: string;
@@ -41,13 +40,13 @@ export default function OtpForm() {
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoaded) return;
     startVerify(async () => {
-      const { success, data: parsedOtp } = otpSchema.safeParse(otp);
+      const { success, data: parsedOtp, error } = otpSchema.safeParse(otp);
       if (!success) {
-        setError({ type: "error", message: "Please enter the 6-digit code." });
+        setError({ type: "error", message: error.message });
         return;
       }
-      if (!isLoaded) return;
 
       try {
         const completeSignup = await signIn.attemptFirstFactor({
@@ -172,7 +171,7 @@ export default function OtpForm() {
             <InputOTPSlot
               index={index}
               key={index}
-              className="w-full h-12 sm:h-18 text-center text-2xl font-black bg-gray-50 dark:bg-gray-900 border-2 border-l border-transparent   rounded-xl dark:text-white"
+              className="w-full h-12 sm:h-18 text-center text-2xl font-black bg-gray-50 dark:bg-gray-900 border-2 border-l border-transparent rounded-xl dark:text-white"
             />
           ))}
         </InputOTPGroup>

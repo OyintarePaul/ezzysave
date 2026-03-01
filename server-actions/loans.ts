@@ -110,7 +110,7 @@ export async function acceptAndDisburseLoan(loanId: string) {
     if (pendingTransactions.totalDocs > 0) {
       return {
         success: false,
-        error: "There is already a pending disbursement for this loan.",
+        error: "There is already a pending or completed disbursement for this loan.",
       };
     }
 

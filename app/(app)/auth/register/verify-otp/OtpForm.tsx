@@ -41,13 +41,13 @@ export default function OtpForm() {
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoaded) return;
     startVerify(async () => {
-      const { success, data: parsedOtp } = otpSchema.safeParse(otp);
+      const { success, data: parsedOtp, error } = otpSchema.safeParse(otp);
       if (!success) {
-        setError({ type: "error", message: "Please enter the 6-digit code." });
+        setError({ type: "error", message: error.message });
         return;
       }
-      if (!isLoaded) return;
 
       try {
         const completeSignup = await signUp.attemptEmailAddressVerification({
@@ -170,12 +170,13 @@ export default function OtpForm() {
         Verify Account
       </CustomButton>
 
-      <div className="mt-10 text-center space-y-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+      <div className="text-center space-y-4">
+        <p className="text-sm text-muted-foreground font-medium">
           Didn't receive the code?
         </p>
         <CustomButton
-          disabled={resendTimer > 0 || isResending}
+          disabled={resendTimer > 0}
+          isPending={isResending}
           type="button"
           onClick={handleResend}
         >

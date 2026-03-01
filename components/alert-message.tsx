@@ -7,7 +7,7 @@ interface ErrorState {
 }
 
 export function AlertMessage({ error }: { error: ErrorState }) {
-  if (!error || !error.message) return null;
+  if (!error.message) return null;
 
   // Map your internal types to the Shadcn variants
   const variantMap = {

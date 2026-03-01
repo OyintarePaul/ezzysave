@@ -247,9 +247,7 @@ export const handleTransferSuccess = async ({
       plan: true,
       loan: true,
     },
-
     depth: 0,
-
     where: {
       paystackRef: {
         equals: reference,
@@ -288,7 +286,9 @@ export const handleTransferSuccess = async ({
         );
       }
 
-      const newBalance = plan.currentBalance! - amountInNaira;
+      const newBalance = plan.currentBalance! - (amountInNaira * 100) / 98;
+      // this will give us the original balance to be deducted from the user instead of the amount sent to them.
+      // taking into consideration the charge
 
       //Update a payment record in Payload CMS
       const updatePlanPromise = payload.update({
@@ -390,62 +390,6 @@ export const handleTransferSuccess = async ({
     );
   }
 };
-
-export async function listBanks() {
-  const response = await fetch(
-    "https://api.paystack.co/bank?currency=NGN&pay_with_bank=true",
-    {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
-      },
-    },
-  );
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Paystack initialization error:", errorData);
-    throw new Error(`Paystack initialization failed: ${response.statusText}`);
-  }
-  return response.json();
-}
-
-
-
-
-
-export async function initiateTransfer({
-  recipientCode,
-  amount,
-  reason,
-  reference,
-}: {
-  recipientCode: string;
-  amount: number;
-  reason: string;
-  reference: string;
-}) {
-  const response = await fetch("https://api.paystack.co/transfer", {
-    method: "POST",
-    body: JSON.stringify({
-      source: "balance",
-      amount: amount * 100, //amount in kobo
-      recipient: recipientCode,
-      reference,
-      reason,
-    }),
-    headers: {
-      Authorization: "Bearer " + process.env.PAYSTACK_SECRET_KEY,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Paystack initialization error:", errorData);
-    throw new Error(`Paystack initialization failed: ${response.statusText}`);
-  }
-  return response.json();
-}
 
 export async function verifyTransfer({ reference }: { reference: string }) {
   const response = await fetch(

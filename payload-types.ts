@@ -173,9 +173,9 @@ export interface Customer {
 export interface SavingsPlan {
   id: string;
   planName: string;
+  planType: 'Target' | 'Fixed' | 'Daily';
   customer?: (string | null) | Customer;
   status?: ('Active' | 'Matured') | null;
-  planType: 'Target' | 'Fixed' | 'Daily';
   currentBalance?: number | null;
   interestEarned?: number | null;
   interestRate?: number | null;
@@ -378,9 +378,9 @@ export interface CustomersSelect<T extends boolean = true> {
  */
 export interface SavingsPlansSelect<T extends boolean = true> {
   planName?: T;
+  planType?: T;
   customer?: T;
   status?: T;
-  planType?: T;
   currentBalance?: T;
   interestEarned?: T;
   interestRate?: T;

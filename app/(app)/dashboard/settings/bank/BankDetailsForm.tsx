@@ -3,8 +3,8 @@ import AsyncSelect from "react-select/async";
 import CustomButton from "@/components/custom-button";
 import { FormInput } from "@/components/form-input";
 import {
-  updateBankDetails,
-  verifyAccountName,
+  updateBankDetailsAction,
+  verifyAccountNameAction,
 } from "@/server-actions/settings";
 import {
   AlertCircle,
@@ -18,10 +18,10 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
-import { Bank } from "@/lib/types";
 import { BankUpdateData, bankUpdateForm } from "@/lib/schema/bank-update-form";
+import { BankArray } from "@/lib/schema/paystack";
 
-export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
+export default function BankDetailsForm({ banks }: { banks: BankArray }) {
   const {
     register,
     setValue,
@@ -34,7 +34,7 @@ export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
       bankCode: "",
       accountNumber: "",
       accountName: "",
-      currentPassword: "",
+      password: "",
     },
   });
   const [isPending, startTransition] = useTransition();
@@ -58,10 +58,9 @@ export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
 
   useEffect(() => {
     const verifyAccount = async () => {
-      console.log("running verify account");
-      if (accNumber && accNumber.length === 10 && bank !== "") {
+      if (accNumber && accNumber.length === 10 && bank) {
         startTransition(async () => {
-          const response = await verifyAccountName(accNumber, bank);
+          const response = await verifyAccountNameAction(accNumber, bank);
           if (response.success) {
             startTransition(() => {
               setValue("accountName", response.data!, { shouldValidate: true });
@@ -82,10 +81,11 @@ export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
 
   const onSubmit = (values: BankUpdateData) => {
     startTransition(async () => {
-      const response = await updateBankDetails({
+      const response = await updateBankDetailsAction({
         accountNumber: values.accountNumber,
         bankCode: values.bankCode,
-        password: values.currentPassword,
+        accountName: values.accountName, // just for validation, not actually used in server action
+        password: values.password,
       });
 
       if (!response.success) {
@@ -181,8 +181,8 @@ export default function BankDetailsForm({ banks }: { banks: Bank[] }) {
         id="currentPassword"
         label="Password"
         type="password"
-        {...register("currentPassword")}
-        error={errors.currentPassword?.message}
+        {...register("password")}
+        error={errors.password?.message}
         icon={<Lock className="h-5 w-5" />}
         placeholder="Enter password to authorize"
         autoComplete="new-password"

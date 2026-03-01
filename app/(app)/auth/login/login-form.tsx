@@ -47,7 +47,7 @@ const LoginForm = () => {
           router.push("/auth/login/second-factor");
         } else {
           console.log(result.status);
-          toast.error("Unexpected sign-in status. Please try again.");
+          toast.error("Login failed. Please try again.");
         }
       } catch (err) {
         console.log(err);

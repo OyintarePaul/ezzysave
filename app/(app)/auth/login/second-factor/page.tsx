@@ -12,9 +12,9 @@ const VerifyOtpPage = () => {
   useEffect(() => {
     // Only run this logic once Clerk has finished loading
     if (isLoaded) {
-      // If there is no sign-up object OR no email has been submitted yet
+      // If there is no sign-in object OR no email has been submitted yet
       if (!signIn || !signIn.identifier) {
-        router.push("/auth/register");
+        router.push("/auth/login");
       }
     }
   }, [isLoaded, signIn, router]);

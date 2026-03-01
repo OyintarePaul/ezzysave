@@ -11,9 +11,6 @@ export const getCurrentPayloadCustomer = cache(async function () {
     where: {
       clerkId: { equals: clerkUserId },
     },
-    select: {
-      withdrawalPin: false
-    },
   });
 
   if (customers.totalDocs === 0) {

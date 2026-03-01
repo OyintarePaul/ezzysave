@@ -16,5 +16,7 @@ export const resolveAccountSchema = z.object({
 });
 export type ResolveAccount = z.infer<typeof resolveAccountSchema>;
 
-export const receipientCodeSchema = z.string().min(1);
+export const receipientCodeSchema = z.object({
+  recipient_code: z.string(),
+})
 export type ReceipientCode = z.infer<typeof receipientCodeSchema>;
