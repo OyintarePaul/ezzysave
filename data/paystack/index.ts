@@ -154,9 +154,7 @@ export async function initiateTransfer({
     console.error("Transfer Initiation Failed:", error.message);
     return {
       success: false,
-      message:
-        error.message ||
-        "An unexpected error occurred with the payment provider.",
+      message: "An unexpected error occurred with the payment provider.",
     };
   }
 }

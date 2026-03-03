@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/dialog";
 
 import BankDetailsForm from "./BankDetailsForm";
-import { Bank } from "@/lib/types";
+import { BankArray } from "@/lib/schema/paystack";
 
-export default function ModifyBankDetailsModal({ banks }: { banks: Bank[] }) {
+export default function ModifyBankDetailsModal({ banks }: { banks: BankArray }) {
   return (
     <Dialog>
       <DialogTrigger asChild>

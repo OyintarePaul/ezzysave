@@ -13,7 +13,7 @@ import { ArrowDown, DollarSign, Info } from "lucide-react";
 import CustomButton from "@/components/custom-button";
 import { toast } from "sonner";
 import { withdrawFromPlan } from "@/server-actions/savings-plans";
-import { SavingsPlan } from "@/payload-types";
+import { SavingsPlan, SavingsSetting } from "@/payload-types";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,7 +24,13 @@ import { FormInput } from "@/components/form-input";
 import PinVault from "./pin-vault";
 import { formatCurrency } from "@/lib/utils";
 
-export default function WithdrawalModal({ plan }: { plan: SavingsPlan }) {
+export default function WithdrawalModal({
+  plan,
+  savingsSettings,
+}: {
+  plan: SavingsPlan;
+  savingsSettings: SavingsSetting;
+}) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [isPending, startTransition] = useTransition();
@@ -50,9 +56,11 @@ export default function WithdrawalModal({ plan }: { plan: SavingsPlan }) {
 
   const [amount, pin] = watch(["amount", "pin"]);
 
-  const FEE_PERCENTAGE = 0.02;
-  const serviceFee = +(amount * FEE_PERCENTAGE).toFixed(2);
-  const netAmount = amount - serviceFee;
+  const configKey = plan.planType.toLowerCase() as "fixed" | "target" | "daily";
+  const planConfig = savingsSettings[configKey];
+  const feePercentage = planConfig?.withdrawalFee ?? 0;
+  const serviceFee = (amount * feePercentage) / 100;
+  const netAmount = Math.round((amount - serviceFee) * 100) / 100;
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);

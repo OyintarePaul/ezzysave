@@ -94,8 +94,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'savings-settings': SavingsSetting;
+  };
+  globalsSelect: {
+    'savings-settings': SavingsSettingsSelect<false> | SavingsSettingsSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -483,6 +487,64 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "savings-settings".
+ */
+export interface SavingsSetting {
+  id: string;
+  fixed: {
+    /**
+     * Annual interest rate for fixed plans (%)
+     */
+    interestRate: number;
+    minimumDeposit: number;
+    /**
+     * Fee charged for early withdrawal (in %)
+     */
+    withdrawalFee: number;
+  };
+  target: {
+    /**
+     * Fee charged for early withdrawal (in %)
+     */
+    withdrawalFee: number;
+  };
+  daily: {
+    /**
+     * Fee charged for early withdrawal (in %)
+     */
+    withdrawalFee: number;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "savings-settings_select".
+ */
+export interface SavingsSettingsSelect<T extends boolean = true> {
+  fixed?:
+    | T
+    | {
+        interestRate?: T;
+        minimumDeposit?: T;
+        withdrawalFee?: T;
+      };
+  target?:
+    | T
+    | {
+        withdrawalFee?: T;
+      };
+  daily?:
+    | T
+    | {
+        withdrawalFee?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,4 +1,4 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 
 export const getCurrentClerkUserId = async function () {
   const { userId } = await auth();
@@ -23,36 +23,39 @@ export async function verifyPassword(userId: string, password: string) {
   }
 }
 
-interface CustomJwtClaims {
-  last_verify?: string | number;
-  last_login?: string | number;
-}
+/**
+ * Checks if the user's primary email was verified within the last X milliseconds.
+ * Default: 5 minutes (300,000 ms)
+ */
 
-export async function isRecentlyVerified() {
-  const { userId, sessionClaims } = (await auth()) as {
-    userId: string | null;
-    sessionClaims: CustomJwtClaims;
-  };
+export async function isRecentlyVerified(
+  thresholdMs: number = 300000, // 5 minutes
+): Promise<boolean> {
+  const user = await currentUser();
 
-  if (!userId) throw new Error("You are not logged in.");
+  // 1. Basic checks: Is the user logged in and do they have a primary email?
+  if (!user || !user.primaryEmailAddressId) return false;
 
-  const lastVerify = new Date(sessionClaims?.last_verify || 0).getTime();
-  const lastLogin = new Date(sessionClaims?.last_login || 0).getTime();
+  const primaryEmail = user.emailAddresses.find(
+    (e) => e.id === user.primaryEmailAddressId,
+  );
+
+  // 2. Ensure the email is actually in a 'verified' state
+  if (!primaryEmail || primaryEmail.verification?.status !== "verified") {
+    return false;
+  }
+
+  /**
+   * FIX: In the Server SDK, we check the User's updatedAt
+   * OR the specific verification's strategy-based timestamp.
+   * Since Clerk updates the User record upon successful OTP,
+   * user.updatedAt is our most reliable source.
+   */
+  const lastUpdatedTime = user.updatedAt; // This is a number (ms) in Server SDK
   const now = Date.now();
+  console.log("Last updated time:", new Date(lastUpdatedTime).toISOString());
+  console.log("Current time:", new Date(now).toISOString());
+  console.log("Difference (ms):", now - lastUpdatedTime);
 
-  console.log("lastVerify", new Date(lastVerify).toISOString());
-  console.log("lastLogin", new Date(lastLogin).toISOString());
-  console.log("now", new Date(now).toISOString());
-
-  // 1. Ensure they actually did a fresh OTP (not just a login)
-  if (!lastVerify || lastVerify <= lastLogin) {
-    return false;
-  }
-
-  // 2. Ensure the OTP was done in the last 3 minutes
-  if (now - lastVerify > 3 * 60 * 1000) {
-    return false;
-  }
-
-  return true;
+  return now - lastUpdatedTime <= thresholdMs;
 }

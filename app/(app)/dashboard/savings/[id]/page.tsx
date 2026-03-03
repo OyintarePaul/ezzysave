@@ -9,6 +9,7 @@ import { getPlan } from "@/data/plans/getPlan";
 import CustomButton from "@/components/custom-button";
 import { Metadata } from "next";
 import PageLayout from "../../components/page-layout";
+import { getSavingsSettings } from "@/data/plans/getSavingsSettings";
 
 export async function generateMetadata({
   params,
@@ -29,6 +30,7 @@ export default async function SavingsDetailsPage({
 }) {
   const { id } = await params;
   const plan = await getPlan(id);
+  const savingsSettings = await getSavingsSettings(); // Fetch settings for interest rates, fees, etc.
   const isDaily = plan.planType === "Daily";
   const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
   const isFixed = plan.planType === "Fixed";
@@ -125,7 +127,7 @@ export default async function SavingsDetailsPage({
             </h2>
 
             <DepositModal plan={plan} />
-            <WithdrawalModal plan={plan} />
+            <WithdrawalModal plan={plan} savingsSettings={savingsSettings} />
 
             <div className="pt-4 border-t dark:border-gray-700 space-y-3">
               <CustomButton variant="outline" className="w-full">

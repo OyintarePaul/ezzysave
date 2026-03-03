@@ -14,6 +14,7 @@ export const pinUpdateFormSchema = z
   })
   .refine((data) => data.newPin === data.confirmPin, {
     message: "New PIN and Confirm PIN must match",
+    path: ["confirmPin"],
   });
 
 export type PinUpdateData = z.infer<typeof pinUpdateFormSchema>;
