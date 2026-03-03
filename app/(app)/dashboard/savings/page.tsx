@@ -92,7 +92,7 @@ const MaturedPlanListItem = ({ plan }: { plan: SavingsPlan }) => (
       <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
       <div>
         <p className="font-medium text-gray-900 dark:text-white">
-          {plan.planName}
+          <Link href={`/dashboard/savings/${plan.id}`}>{plan.planName}</Link>
         </p>
         <p className="text-sm text-gray-500">
           Matured on: {new Date(plan.updatedAt).toLocaleDateString()}

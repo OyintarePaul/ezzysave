@@ -239,6 +239,9 @@ export const handleTransferSuccess = async ({
 }) => {
   const amountInNaira = amount / 100;
   const payload = await getPayloadClient();
+  const savingsSettings = await payload.findGlobal({
+    slug: "savings-settings",
+  });
 
   // get metadata from transaction with matching paystackRef
   const transactions = await payload.find({
@@ -286,9 +289,14 @@ export const handleTransferSuccess = async ({
         );
       }
 
-      const newBalance = plan.currentBalance! - (amountInNaira * 100) / 98;
-      // this will give us the original balance to be deducted from the user instead of the amount sent to them.
-      // taking into consideration the charge
+      const feePercentage =
+        savingsSettings[
+          plan.planType.toLowerCase() as "fixed" | "target" | "daily"
+        ]?.withdrawalFee ?? 0;
+
+      const newBalance =
+        plan.currentBalance! - (amountInNaira * 100) / (100 - feePercentage); // this will give us the original balance to be deducted from the user instead of the amount sent to them.
+      // taking into consideration the charge. For example, if the user is supposed to receive 95 after a 5% fee, we need to deduct 100 from their balance to account for the fee.
 
       //Update a payment record in Payload CMS
       const updatePlanPromise = payload.update({

@@ -48,7 +48,10 @@ export default function DepositModal({ plan }: { plan: SavingsPlan }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <CustomButton className="w-full py-3 font-semibold">
+        <CustomButton
+          className="w-full py-3 font-semibold"
+          disabled={plan.status !== "Active"}
+        >
           <ArrowUp className="h-5 w-5" />
           <span>Make a Deposit</span>
         </CustomButton>
