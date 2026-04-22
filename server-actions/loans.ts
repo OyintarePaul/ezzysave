@@ -1,11 +1,11 @@
 "use server";
 import { v4 as uuid } from "uuid";
 import { getPayloadClient } from "@/lib/payload";
-import { initiateTransfer } from "@/lib/paystack";
 import { revalidatePath } from "next/cache";
 import { getCurrentPayloadCustomer } from "@/data/customers/getCustomer";
 import { ServerActionResponse } from "@/lib/types";
 import { LoanFormData, loanFormSchema } from "@/lib/schema/loan-form";
+import { initiateTransfer } from "@/data/paystack";
 
 export async function submitLoanApplication(
   loanData: LoanFormData,
@@ -110,7 +110,8 @@ export async function acceptAndDisburseLoan(loanId: string) {
     if (pendingTransactions.totalDocs > 0) {
       return {
         success: false,
-        error: "There is already a pending or completed disbursement for this loan.",
+        error:
+          "There is already a pending or completed disbursement for this loan.",
       };
     }
 
@@ -138,6 +139,20 @@ export async function acceptAndDisburseLoan(loanId: string) {
       reason: `Disbursement for loan ${loanId}`,
       reference: txResponse.paystackRef!,
     });
+    if (!initiateTransferResponse.success) {
+      // update transaction status to failed
+      await payload.update({
+        collection: "transactions",
+        id: txResponse.id,
+        data: {
+          status: "failed",
+        },
+      });
+      return {
+        success: false,
+        error: "Failed to initiate transfer for loan disbursement.",
+      };
+    }
 
     console.log(
       `Disbursed amount ${amount} to customer ${customer.id} for loan ${loanId}`,

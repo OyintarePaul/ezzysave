@@ -34,6 +34,7 @@ export const SavingsPlanCard = ({ plan }: { plan: SavingsPlan }) => {
   const { icon, color, barColor, bgColor } = getIconAndColor(plan.planType);
   const isFixed = plan.planType === "Fixed";
   const isDaily = plan.planType === "Daily";
+  const isTarget = plan.planType === "Target";
 
   // Progress only matters for Target plans
   const progress =
@@ -96,7 +97,7 @@ export const SavingsPlanCard = ({ plan }: { plan: SavingsPlan }) => {
         )}
 
         {/* 3. TARGET DESIGN (Progress Bar) */}
-        {!isFixed && !isDaily && (
+        {isTarget && (
           <>
             <div className="flex justify-between text-sm mb-1">
               <span className="font-medium text-gray-900 dark:text-white">

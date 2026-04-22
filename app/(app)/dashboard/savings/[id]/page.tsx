@@ -37,8 +37,10 @@ export default async function SavingsDetailsPage({
   const plan = await getPlan(id);
   const savingsSettings = await getSavingsSettings(); // Fetch settings for interest rates, fees, etc.
   const isDaily = plan.planType === "Daily";
-  const progress = (plan.currentBalance! / plan.targetAmount!) * 100;
   const isFixed = plan.planType === "Fixed";
+  const progress = plan.targetAmount
+    ? Math.min((plan.currentBalance! / plan.targetAmount!) * 100, 100)
+    : 0;
   const maturityDate = addMonths(
     new Date(plan.createdAt),
     plan.duration || 6,
@@ -48,7 +50,7 @@ export default async function SavingsDetailsPage({
     year: "numeric",
   });
 
-  const { icon, barColor } = getIconAndColor(plan.planType);
+  const { icon, barColor, bgColor, color } = getIconAndColor(plan.planType);
 
   return (
     <PageLayout
@@ -56,7 +58,9 @@ export default async function SavingsDetailsPage({
         <div className="flex items-center space-x-3">
           <span className="hidden md:inline">{icon}</span>
           <span>{plan.planName}</span>
-          <span className="text-sm font-medium px-3 py-1 bg-primary/10 text-primary rounded-full ">
+          <span
+            className={`text-sm font-medium px-3 py-1 ${bgColor} ${color} rounded-full `}
+          >
             {plan.planType} Plan
           </span>
         </div>
@@ -213,18 +217,21 @@ const getIconAndColor = (type: SavingsPlan["planType"]) => {
         icon: <Target className="h-6 w-6 text-green-500" />,
         color: "text-green-500",
         barColor: "bg-green-500",
+        bgColor: "bg-green-100",
       };
     case "Fixed":
       return {
         icon: <Lock className="h-6 w-6 text-blue-500" />,
         color: "text-blue-500",
         barColor: "bg-blue-500",
+        bgColor: "bg-blue-100",
       };
     case "Daily":
       return {
         icon: <Zap className="h-6 w-6 text-yellow-500" />,
         color: "text-yellow-500",
         barColor: "bg-yellow-500",
+        bgColor: "bg-yellow-100",
       };
   }
 };
